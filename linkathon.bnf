@@ -1,0 +1,25 @@
+<link-request> ::- LINK <portalname> [TO] <portalname> [AS <id>]
+
+<field-request> ::- FIELD <portalname> <portalname> <portalname> [AS <id>]
+
+<capture-request> ::- CAPTURE <portalname> [AS <id>]
+
+<destroy-link-request> ::= DESTROY <link-id> [AS <id>]
+<destroy-portal-request> ::= DESTROY <portalname> [AS <id>]
+
+<deploy-request> ::= DEPLOY <portalname> [<resonator-list>] [AS <id>]
+
+<link-sequence> ::= <link-request> [<link-sequence>]
+
+<portal> ::= <portalname> | <portalguid> | <lat>[,] <lng>
+
+<id> ::= <number>+
+
+<command-entry> ::= <field-request> |
+					<capture-request> |
+					<destroy-link-request>
+					<destroy-portal-request> |
+					<deploy-request> |
+					<link-sequence>
+
+<command-sequence> ::= <command-entry> [<command-sequence>]

@@ -1,0 +1,51 @@
+digraph "WM Linkathon" {
+
+NODE1 [label="Southern Entrance To War Memorial"]
+NODE2 [label="If Aught of Oaten"]
+NODE3 [label="The Bounty Inn Pub"]
+NODE4 [label="I Saw The Hare"]
+NODE5 [label="Diana Stanley Memorial Plaque"]
+NODE6 [label="War Memorial Playground"]
+NODE7 [label="Torch"]
+NODE8 [label="Civic Centre War Memorial"]
+NODE9 [label="War Memorial Park"]
+NODE10 [label="Memorial Park Aviary"]
+NODE11 [label="Shelter Dedication Plaque"]
+NODE12 [label="The Golden Tree Engraving"]
+NODE13 [label="Memorial Band Stand"]
+NODE14 [label="Kath And Gordon Ball Memorial"]
+NODE15 [label="Winnie White Memorial Bench"]
+NODE16 [label="Tree Planting Ceremony Plaque"]
+NODE17 [label="Ivy & George White Plaque"]
+
+
+NODE1 -> NODE2 -> NODE3 -> NODE1 [label="FIELD20"]
+NODE1 -> NODE3 -> NODE6 -> NODE1 [label="FIELD21"]
+NODE1 -> NODE3 -> NODE15 -> NODE1 [label="FIELD22"]
+NODE1 -> NODE3 -> NODE17 -> NODE1 [label="FIELD23"]
+NODE1 -> NODE3 -> NODE16 -> NODE1 [label="FIELD24"]
+NODE1 -> NODE3 -> NODE14 -> NODE1 [label="FIELD25"]
+NODE1 -> NODE3 -> NODE11 -> NODE1 [label="FIELD26"]
+NODE1 -> NODE3 -> NODE8 -> NODE1 [label="FIELD27"]
+NODE1 -> NODE3 -> NODE12 -> NODE1 [label="FIELD28"]
+
+NODE3 -> NODE6 -> NODE5 -> NODE3 [label="FIELD50"]
+NODE3 -> NODE6 -> NODE2 -> NODE3 [label="FIELD51"]
+NODE3 -> NODE4 -> NODE17 -> NODE3 [label="FIELD52"]
+NODE3 -> NODE13 -> NODE14 -> NODE3 [label="FIELD53"]
+NODE3 -> NODE10 -> NODE14 -> NODE3 [label="FIELD54"]
+NODE3 -> NODE9 -> NODE11 -> NODE3 [label="FIELD55"]
+NODE3 -> NODE7 -> NODE11 -> NODE3 [label="FIELD56"]
+
+NODE2 -> NODE12 [label="LINK101"]; // Kicker for 20-28
+NODE17 -> NODE15 [label="LINK102"]; // Kicker for 23-22
+NODE16 -> NODE17 [label="LINK103"]; // Kicker for 24-23
+NODE16 -> NODE4 [label="LINK104"]; // Kicker for 24-52
+NODE14 -> NODE16 [label="LINK105"]; // Kicker for 25-24
+NODE10 -> NODE13 [label="LINK106"]; // Kicker for 54-53
+NODE11 -> NODE10 [label="LINK107"]; // Kicker for 26-54
+NODE11 -> NODE14 [label="LINK108"]; // Kicker for 26-25
+NODE9 -> NODE7 [label="LINK109"]; // Kicker for 55-56
+NODE8 -> NODE11 [label="LINK110"]; // Kicker for 27-26
+NODE8 -> NODE9 [label="LINK111"]; // Kicker for 27-55
+}
