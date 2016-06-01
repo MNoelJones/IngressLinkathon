@@ -24,7 +24,7 @@ def point_in_triangle(p, p1, p2, p3):
     try:
         (a, b, c) = bary(p1, p2, p3, p)
     except:
-        print "Exception {} {} {} {}".format(p1, p2, p3, p)
+        print("Exception {} {} {} {}".format(p1, p2, p3, p))
         return False
     return (0 <= a <= 1 and
             0 <= b <= 1 and
