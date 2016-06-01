@@ -95,7 +95,7 @@ class TestLinkathon(TestCase):
             p.location = loc
         l.fields.update({
             y: linkathon.Field(*[p for x in fields[y]
-                                 for p in l.portals.itervalues()
+                                 for p in l.portals.values()
                                  if p.id == x])
             for y in fields
         })
