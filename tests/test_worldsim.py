@@ -281,3 +281,6 @@ class TestWorldsim(TestCase):
             portals[1],
             portals[3]
         ))
+
+    def test_cannot_link_from_portal_inside_field(self):
+        pass
