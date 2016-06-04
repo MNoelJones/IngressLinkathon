@@ -6,6 +6,39 @@ def area_of_triangle(point1, point2, point3):
     return abs((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3))
 
 
+def bary(point1, point2, point3, point4):
+    (x1, y1) = point1
+    (x2, y2) = point2
+    (x3, y3) = point3
+    (x, y) = point4
+    try:
+        a = (
+            (y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)
+        ) / (
+            (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+        )
+        b = (
+            (y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)
+        ) / (
+            (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+        )
+    except BaseException as err:
+        raise ValueError
+    c = 1 - a - b
+    return (a, b, c)
+
+
+def pointintri(p, p1, p2, p3):
+    try:
+        (a, b, c) = bary(p1, p2, p3, p)
+    except BaseException as err:
+        print "Exception ({}) {} {} {} {}".format(err, p1, p2, p3, p)
+        return False
+    return (0 <= a <= 1 and
+            0 <= b <= 1 and
+            0 <= c <= 1)
+
+
 class Command(object):
     def __init__(self, world=None, player=None):
         self._world = world
@@ -45,11 +78,11 @@ class LinkCommand(Command):
         if self.player.location == self._portal1.location:
             self._world.create_link(self._portal1, self._portal2)
         else:
-            print("Link failed - player not within range of {} ({})".format(
-                            self._portal1.name,
-                            self._portal1.location
-                        )
+            print "Link failed - player not within range of {} ({})".format(
+                self._portal1.name,
+                self._portal1.location
             )
+
 
 class MoveCommand(Command):
     def __init__(self, location=None, **kwargs):
@@ -190,6 +223,16 @@ class World(object):
     def create_field(self, portal1, portal2, portal3):
         self.fields.append(Field([portal1, portal2, portal3]))
 
+    def portal_within_field(self, portal):
+        """ Test if a portal is within any existing fields. """
+        for field in self.fields:
+            if pointintri(
+                portal.location,
+                *[x.location for x in field.portals]
+            ):
+                return True
+        return False
+
     def create_link(self, portal_one, portal_two):
         assert portal_one in self._portals, (
             "Unknown portal, {}".format(portal_one)
@@ -197,24 +240,26 @@ class World(object):
         assert portal_two in self._portals, (
             "Unknown portal, {}".format(portal_two)
         )
-        print("\nLinking {} to {}".format(portal_one.name, portal_two.name))
+        if self.portal_within_field(portal_one):
+            raise ValueError  # ("Portal inside a field")
+        print "\nLinking {} to {}".format(portal_one.name, portal_two.name)
         portal_one.add_link(portal_two)
-        print("outbound_links for {}: {}".format(
+        print "outbound_links for {}: {}".format(
             portal_one.name,
             ",".join(p.name for p in portal_one.outbound_links)
-        ))
-        print("outbound_links for {}: {}".format(
+        )
+        print "outbound_links for {}: {}".format(
             portal_two.name,
             ",".join(p.name for p in portal_two.outbound_links)
-        ))
+        )
         # Are there any common linked portals for portal_one and portal_two
         potential_field_portals = (
             (set(portal_one.outbound_links) | set(portal_one.inbound_links)) &
             (set(portal_two.outbound_links) | set(portal_two.inbound_links))
         )
-        print("potential fields created with: {}\n\n".format(
+        print "potential fields created with: {}\n\n".format(
             potential_field_portals
-        ))
+        )
         if potential_field_portals:
             size_key = functools.partial(
                 self.area_of_field,
@@ -222,7 +267,7 @@ class World(object):
                 portal_two
             )
             max_field_portal = max(potential_field_portals, key=size_key)
-            print("max size field created to: {}".format(max_field_portal.name))
+            print "max size field created to: {}".format(max_field_portal.name)
             self.create_field(portal_one, portal_two, max_field_portal)
 
     def add_player(self, player):

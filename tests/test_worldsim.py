@@ -1,6 +1,6 @@
 # test_worldsim.py
 from unittest import TestCase
-from worldsim import World, Player, LinkCommand, MoveCommand
+from worldsim import World, Player, LinkCommand, MoveCommand, Field, pointintri
 
 
 class TestWorldsim(TestCase):
@@ -214,6 +214,52 @@ class TestWorldsim(TestCase):
             portals[2]
         ))
 
+    def test_portal_within_field_cannot_be_linked(self):
+        """
+            When the player attempts to link from
+            a portal which is within a field,
+            the link is not created.
+        """
+        player = self.add_player_to_world()
+        portals = [
+            p for y in [
+                "The Bounty Inn Pub",
+                "Southern Entrance To War Memorial",
+                "Ivy & George White Plaque",
+                "Winnie White Memorial Bench",
+            ] for p in self.create_portals() if p.name == y
+        ]
+        print portals
+        player.add_command(MoveCommand(portals[2].location))
+        player.add_command(LinkCommand(
+            portal1=portals[2],
+            portal2=portals[0]
+        ))
+        player.add_command(LinkCommand(
+            portal1=portals[2],
+            portal2=portals[1]
+        ))
+        player.add_command(MoveCommand(portals[0].location))
+        player.add_command(LinkCommand(
+            portal1=portals[0],
+            portal2=portals[1]
+        ))
+        player.add_command(MoveCommand(portals[3].location))
+        player.add_command(LinkCommand(
+            portal1=portals[3],
+            portal2=portals[1]
+        ))
+        for command in player.commands[0:-1]:
+            command()
+        self.assertFalse(self.world.link_exists(portals[3], portals[1]))
+
+        with self.assertRaises(ValueError):
+            player.commands[-1]()
+        self.assertFalse(self.world.link_exists(portals[3], portals[1]))
+
+    def test_link_creates_two_fields(self):
+        pass
+
     def test_larger_field_is_chosen(self):
         """
             A player connects three portals with links.
@@ -281,6 +327,3 @@ class TestWorldsim(TestCase):
             portals[1],
             portals[3]
         ))
-
-    def test_cannot_link_from_portal_inside_field(self):
-        pass
