@@ -53,7 +53,7 @@ class TestWorldsim(TestCase):
 
         names = [
             ("Southern Entrance To War Memorial"),
-            ("If Aught of Oaten"),
+            ("If Aught Of Oaten"),
             ("The Bounty Inn Pub"),
             ("I Saw The Hare"),
             ("Diana Stanley Memorial Plaque"),
@@ -258,7 +258,61 @@ class TestWorldsim(TestCase):
         self.assertFalse(self.world.link_exists(portals[3], portals[1]))
 
     def test_link_creates_two_fields(self):
-        pass
+        player = self.add_player_to_world()
+        portals = [
+            p for y in [
+                "Southern Entrance To War Memorial",
+                "The Bounty Inn Pub",
+                "Winnie White Memorial Bench",
+                "If Aught Of Oaten",
+            ] for p in self.create_four_portals() if p.name == y
+        ]
+        player.add_command(MoveCommand(portals[2].location))
+        player.add_command(LinkCommand(
+            portal1=portals[2],
+            portal2=portals[0]
+        ))
+        player.add_command(LinkCommand(
+            portal1=portals[2],
+            portal2=portals[1]
+        ))
+        player.add_command(MoveCommand(portals[3].location))
+        player.add_command(LinkCommand(
+            portal1=portals[3],
+            portal2=portals[0]
+        ))
+        player.add_command(LinkCommand(
+            portal1=portals[3],
+            portal2=portals[1]
+        ))
+        player.add_command(MoveCommand(portals[0].location))
+        player.add_command(LinkCommand(
+            portal1=portals[0],
+            portal2=portals[1]
+        ))
+        for command in player.commands[:-1]:
+            command()
+        self.assertFalse(self.world.field_exists(
+            portals[0],
+            portals[1],
+            portals[2]
+        ))
+        self.assertFalse(self.world.field_exists(
+            portals[0],
+            portals[1],
+            portals[3]
+        ))
+        player.commands[-1]()
+        self.assertTrue(self.world.field_exists(
+            portals[0],
+            portals[1],
+            portals[2]
+        ))
+        self.assertTrue(self.world.field_exists(
+            portals[0],
+            portals[1],
+            portals[3]
+        ))
 
     def test_larger_field_is_chosen(self):
         """
