@@ -244,31 +244,93 @@ class World(object):
             raise ValueError  # ("Portal inside a field")
         print "\nLinking {} to {}".format(portal_one.name, portal_two.name)
         portal_one.add_link(portal_two)
-        print "outbound_links for {}: {}".format(
+        print "links for {}: {}".format(
             portal_one.name,
-            ",".join(p.name for p in portal_one.outbound_links)
+            ",".join(
+                p.name for p in set(
+                    set(portal_one.outbound_links) |
+                    set(portal_one.inbound_links)
+                )
+            )
         )
-        print "outbound_links for {}: {}".format(
+        print "links for {}: {}".format(
             portal_two.name,
-            ",".join(p.name for p in portal_two.outbound_links)
+            ",".join(
+                p.name for p in set(
+                    set(portal_two.outbound_links) |
+                    set(portal_two.inbound_links)
+                )
+            )
         )
         # Are there any common linked portals for portal_one and portal_two
         potential_field_portals = (
             (set(portal_one.outbound_links) | set(portal_one.inbound_links)) &
             (set(portal_two.outbound_links) | set(portal_two.inbound_links))
         )
-        print "potential fields created with: {}\n\n".format(
-            potential_field_portals
+        print "potential fields created with: {}".format(
+            [x.name for x in potential_field_portals]
         )
         if potential_field_portals:
-            size_key = functools.partial(
-                self.area_of_field,
-                portal_one,
-                portal_two
-            )
-            max_field_portal = max(potential_field_portals, key=size_key)
-            print "max size field created to: {}".format(max_field_portal.name)
-            self.create_field(portal_one, portal_two, max_field_portal)
+            handled1 = []
+            pfp = list(potential_field_portals)
+            item = pfp.pop()
+            pfp.append(item)
+            while item not in handled1:
+                handled2 = []
+                test_portal = pfp.pop()
+                print("test_portal: {}".format(test_portal.name))
+                while test_portal not in handled2:
+                    print "Is {} within field created with {}?".format(
+                        test_portal.name,
+                        item.name
+                    )
+                    # pfp.append(test_portal)
+                    if test_portal is item:
+                        pfp.append(test_portal)
+                        print("pfp: {}\nhandled1: {}\nhandled2: {}".format(
+                            [x.name for x in pfp],
+                            [x.name for x in handled1],
+                            [x.name for x in handled2],
+
+                        ))
+                    else:
+                        if pointintri(
+                            test_portal.location,
+                            item.location,
+                            portal_one.location,
+                            portal_two.location
+                        ):
+                            print(
+                                "Removed {} from the potentials, "
+                                "comparing against {}".format(
+                                    test_portal.name, item.name
+                                )
+                            )
+                        else:
+                            pfp.append(test_portal)
+                            print "No.\n"
+                    handled2.append(test_portal)
+                    if pfp:
+                        test_portal = pfp.pop()
+                        pfp.append(test_portal)
+                        print "[inner] pfp: {}".format(
+                            [x.name for x in pfp]
+                        )
+                handled1.append(item)
+                if pfp:
+                    item = pfp.pop()
+                    pfp.append(item)
+                    print "[outer] pfp: {}".format(
+                        [x.name for x in pfp]
+                    )
+
+            for field_portal in pfp:
+                print "\nCreating field: {} -> {} -> {}\n".format(
+                    portal_one.name,
+                    portal_two.name,
+                    field_portal.name
+                )
+                self.create_field(portal_one, portal_two, field_portal)
 
     def add_player(self, player):
         self.players.append(player)
