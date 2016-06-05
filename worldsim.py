@@ -242,87 +242,34 @@ class World(object):
         )
         if self.portal_within_field(portal_one):
             raise ValueError  # ("Portal inside a field")
-        print "\nLinking {} to {}".format(portal_one.name, portal_two.name)
+        print "Linking {} to {}".format(portal_one.name, portal_two.name)
         portal_one.add_link(portal_two)
-        print "links for {}: {}".format(
-            portal_one.name,
-            ",".join(
-                p.name for p in set(
-                    set(portal_one.outbound_links) |
-                    set(portal_one.inbound_links)
-                )
-            )
-        )
-        print "links for {}: {}".format(
-            portal_two.name,
-            ",".join(
-                p.name for p in set(
-                    set(portal_two.outbound_links) |
-                    set(portal_two.inbound_links)
-                )
-            )
-        )
         # Are there any common linked portals for portal_one and portal_two
         potential_field_portals = (
             (set(portal_one.outbound_links) | set(portal_one.inbound_links)) &
             (set(portal_two.outbound_links) | set(portal_two.inbound_links))
         )
-        print "potential fields created with: {}".format(
-            [x.name for x in potential_field_portals]
-        )
         if potential_field_portals:
             handled1 = []
             pfp = list(potential_field_portals)
-            item = pfp.pop()
-            pfp.append(item)
-            while item not in handled1:
-                handled2 = []
-                test_portal = pfp.pop()
-                print("test_portal: {}".format(test_portal.name))
-                while test_portal not in handled2:
-                    print "Is {} within field created with {}?".format(
-                        test_portal.name,
-                        item.name
-                    )
-                    # pfp.append(test_portal)
-                    if test_portal is item:
-                        pfp.append(test_portal)
-                        print("pfp: {}\nhandled1: {}\nhandled2: {}".format(
-                            [x.name for x in pfp],
-                            [x.name for x in handled1],
-                            [x.name for x in handled2],
-
-                        ))
-                    else:
+            idx1 = 0
+            while idx1 < len(pfp):
+                item = pfp[idx1]
+                idx2 = 0
+                while idx2 < len(pfp):
+                    test_portal = pfp[idx2]
+                    if test_portal is not item:
                         if pointintri(
                             test_portal.location,
                             item.location,
                             portal_one.location,
                             portal_two.location
                         ):
-                            print(
-                                "Removed {} from the potentials, "
-                                "comparing against {}".format(
-                                    test_portal.name, item.name
-                                )
-                            )
+                            pfp.remove(test_portal)
                         else:
-                            pfp.append(test_portal)
                             print "No.\n"
-                    handled2.append(test_portal)
-                    if pfp:
-                        test_portal = pfp.pop()
-                        pfp.append(test_portal)
-                        print "[inner] pfp: {}".format(
-                            [x.name for x in pfp]
-                        )
-                handled1.append(item)
-                if pfp:
-                    item = pfp.pop()
-                    pfp.append(item)
-                    print "[outer] pfp: {}".format(
-                        [x.name for x in pfp]
-                    )
+                    idx2 += 1
+                idx1 += 1
 
             for field_portal in pfp:
                 print "\nCreating field: {} -> {} -> {}\n".format(
