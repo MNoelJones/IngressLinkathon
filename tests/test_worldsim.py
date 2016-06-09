@@ -1,6 +1,7 @@
 # test_worldsim.py
+from __future__ import print_function
 from unittest import TestCase
-from worldsim import World, Player, LinkCommand, MoveCommand, Field, pointintri
+from worldsim import World, Player, LinkCommand, MoveCommand
 
 
 class TestWorldsim(TestCase):
@@ -229,7 +230,6 @@ class TestWorldsim(TestCase):
                 "Winnie White Memorial Bench",
             ] for p in self.create_portals() if p.name == y
         ]
-        print portals
         player.add_command(MoveCommand(portals[2].location))
         player.add_command(LinkCommand(
             portal1=portals[2],
