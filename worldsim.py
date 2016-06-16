@@ -32,7 +32,7 @@ def pointintri(p, p1, p2, p3):
     try:
         (a, b, c) = bary(p1, p2, p3, p)
     except BaseException as err:
-        print "Exception ({}) {} {} {} {}".format(err, p1, p2, p3, p)
+        print("Exception ({}) {} {} {} {}".format(err, p1, p2, p3, p))
         return False
     return (0 <= a <= 1 and
             0 <= b <= 1 and
@@ -78,9 +78,11 @@ class LinkCommand(Command):
         if self.player.location == self._portal1.location:
             self._world.create_link(self._portal1, self._portal2)
         else:
-            print "Link failed - player not within range of {} ({})".format(
-                self._portal1.name,
-                self._portal1.location
+            print(
+                "Link failed - player not within range of {} ({})".format(
+                    self._portal1.name,
+                    self._portal1.location
+                )
             )
 
 
@@ -242,7 +244,7 @@ class World(object):
         )
         if self.portal_within_field(portal_one):
             raise ValueError  # ("Portal inside a field")
-        print "Linking {} to {}".format(portal_one.name, portal_two.name)
+        print("Linking {} to {}".format(portal_one.name, portal_two.name))
         portal_one.add_link(portal_two)
         # Are there any common linked portals for portal_one and portal_two
         potential_field_portals = (
@@ -267,15 +269,17 @@ class World(object):
                         ):
                             pfp.remove(test_portal)
                         else:
-                            print "No.\n"
+                            print("No.\n")
                     idx2 += 1
                 idx1 += 1
 
             for field_portal in pfp:
-                print "\nCreating field: {} -> {} -> {}\n".format(
-                    portal_one.name,
-                    portal_two.name,
-                    field_portal.name
+                print(
+                    "\nCreating field: {} -> {} -> {}\n".format(
+                        portal_one.name,
+                        portal_two.name,
+                        field_portal.name
+                    )
                 )
                 self.create_field(portal_one, portal_two, field_portal)
 

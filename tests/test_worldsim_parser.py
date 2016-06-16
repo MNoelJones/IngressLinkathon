@@ -1,13 +1,15 @@
 # test_worldsim_parser.py
 from unittest import TestCase
+from worldsim_parser import WorldsimParser
 
 
 class TestWorldsimParser(TestCase):
     def setUp(self):
-        pass
+        self.parser = WorldsimParser()
 
     def test_ID(self):
-        self.fail()
+        instring = 'ID "Southern Entrance To War Memorial" AS 1'
+        assert self.parser.parseString(instring)
 
     def test_Field(self):
         self.fail()
