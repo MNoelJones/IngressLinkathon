@@ -1,5 +1,5 @@
 # test_worldsim_parser.py
-from unittest import TestCase
+from unittest import TestCase, skip
 from worldsim_parser import WorldsimParser
 
 
@@ -12,16 +12,22 @@ class TestWorldsimParser(TestCase):
         assert self.parser.parseString(instring)
 
     def test_Field(self):
-        self.fail()
+        instring = 'FIELD 1 2 3    AS 20'
+        assert self.parser.parseString(instring)
 
     def test_Link(self):
-        self.fail()
+        # instring = "LINK 2 12      AS 101 # Kicker for 20-28"
+        instring = "LINK 2 12      AS 101"
+        assert self.parser.parseString(instring)
 
     def test_Locate(self):
-        self.fail()
+        instring = "LOCATE 1 AT 51.258472N,  -1.076191E"
+        assert self.parser.parseString(instring)
 
     def test_Guid(self):
-        self.fail()
+        instring = "GUID 1 47db8ce5d774463f9a8e7aef948e8093.16"
+        assert self.parser.parseString(instring)
 
     def test_Move(self):
-        self.fail()
+        instring = "MOVE 51.258472N, -1.076191E"
+        assert self.parser.parseString(instring)

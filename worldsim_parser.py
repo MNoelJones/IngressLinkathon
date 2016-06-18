@@ -1,6 +1,6 @@
 # worldsim_parser.py
 from pyparsing import *
-from pyparsing import oneOf
+from pyparsing import oneOf, quotedString
 from pyparsing import pyparsing_common as ppc
 identifier = ppc.identifier
 integer = ppc.integer
@@ -8,7 +8,8 @@ real = ppc.real
 numeric = ppc.numeric
 
 """ BNF:
-<portal-id> ::= ID <portalname> '=' <portalguid>
+<pid> ::= <numeric>
+<portal-id> ::= ID <portalname> '=' <pid>
 
 <link-request> ::= LINK <portal> [TO] <portal> [AS <id>]
 
@@ -20,6 +21,7 @@ capture-request> ::= CAPTURE <portalname> [AS <id>]
 <destroy-portal-request> ::= DESTROY <portalname> [AS <id>]
 
 <deploy-request> ::= DEPLOY <portalname> [<resonator-list>] [AS <id>]
+<guid-command> ::= GUID <pid> <portalguid>
 
 <link-ref> ::= <id> | <link-request>
 <field-ref> ::= <id> | <field-request>
@@ -37,7 +39,7 @@ capture-request> ::= CAPTURE <portalname> [AS <id>]
 <lat> ::= ['-'] <intorfloat | <intorfloat>  ['N' | 'S']
 <lng> ::= ['-'] <intorfloat> | <intorfloat> ['E' | 'W']
 
-<portalguid> ::= <id>
+<portalguid> ::= <hexdigit>+ '.' <hexdigit>+
 
 <id> ::= <hexdigit>+
 
@@ -56,15 +58,21 @@ capture-request> ::= CAPTURE <portalname> [AS <id>]
 
 class WorldsimParser(ParserElement):
     def __init__(self):
+        super(WorldsimParser, self).__init__()
         pid = Word(hexnums)
-        portalname = (identifier)
+        portalname = (quotedString)
         portalguid = Word(hexnums + '.' + hexnums, exact=35)
         as_id = Optional(Suppress(Keyword('AS')) + pid)
         link_id = pid
         portal_id = (
             Suppress(Keyword('ID')) +
             portalname +
-            Suppress(Literal('=')) +
+            Suppress(Literal('=') | Keyword('AS')) +
+            pid
+        )
+        guid_command = (
+            Suppress(Keyword('GUID')) +
+            pid +
             portalguid
         )
         # <lat> ::= ['-'] <intorfloat | <intorfloat>  ['N' | 'S']
@@ -74,7 +82,7 @@ class WorldsimParser(ParserElement):
         # <latlng> ::= <lat>[,] <lng>
         latlng = lat + Optional(Literal(',')) + lng
         # <portal> ::= <portalname> | <portalguid> | <latlng>
-        portal = portalname | portalguid | latlng
+        portal = portalname | portalguid | latlng | pid
         link_request = (
             Suppress(Keyword('LINK')) +
             portal +
@@ -119,14 +127,14 @@ class WorldsimParser(ParserElement):
             pid | capture_request
         )
     # <destroy-link-ref> ::= <id> | <destroy-link-request>
-        destroy_link_request = Forward()
-        destroy_link_request <<= (
-            pid | destroy_link_request
+        destroy_link_ref = Forward()
+        destroy_link_ref <<= (
+            pid | destroy_link_ref
         )
     # <destroy-portal-ref> ::= <id> | <destroy-portal-request>
         destroy_portal_ref = Forward()
         destroy_portal_ref = (
-            pid | destro_portal_ref
+            pid | destroy_portal_ref
         )
     # <deploy-ref> ::= <id> | <deploy-request>
         deploy_ref = (pid | deploy_request)
@@ -153,7 +161,8 @@ class WorldsimParser(ParserElement):
             link_sequence
         )
     # <command-sequence> ::= SEQ <command-entry> [<command-sequence>]
-        command_sequence = (
+        command_sequence = Forward()
+        command_sequence <<= (
             Suppress(Keyword("SEQ")) +
             command_entry +
             Optional(command_sequence)
@@ -162,6 +171,24 @@ class WorldsimParser(ParserElement):
         locate_command = (
             Suppress(Keyword('LOCATE')) +
             portal +
-            Ignore(Optional(Keyword('AT'))) +
+            Suppress(Optional(Keyword('AT'))) +
             latlng
         )
+        # <move-command> ::= MOVE <latlng>
+        move_command = Suppress(Keyword('MOVE')) + latlng
+        # self.parser = OneOrMore(
+        #     command_entry ^
+        #     portal_id ^
+        #     guid_command
+        # )
+        self.parser = (
+            portal_id ^
+            field_ref ^
+            link_request ^
+            locate_command ^
+            guid_command ^
+            move_command
+        )
+
+    def parseString(self, instring):
+        return self.parser.parseString(instring)
