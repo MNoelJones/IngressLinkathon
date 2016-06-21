@@ -74,7 +74,7 @@ class WorldsimParser(ParserElement):
             Suppress(Keyword('GUID')) +
             pid +
             portalguid
-        )
+        ).setParseAction(self.guid_command_action)
         # <lat> ::= ['-'] <intorfloat | <intorfloat>  ['N' | 'S']
         lat = real + Or(Literal('N'), Literal('S'))
         # <lng> ::= ['-'] <intorfloat> | <intorfloat> ['E' | 'W']
@@ -89,22 +89,22 @@ class WorldsimParser(ParserElement):
             Optional(Suppress(Literal('TO'))) +
             portal +
             as_id
-        )
+        ).setParseAction(self.link_request_action)
         field_request = (
             Suppress(Keyword('FIELD')) +
             portal + portal + portal +
             as_id
-        )
+        ).setParseAction(self.field_request_action)
         capture_request = (
             Suppress(Keyword('CAPTURE')) +
             portalname +
             as_id
-        )
+        ).setParseAction(self.capture_request_action)
         destroy_link_request = (
             Suppress(Keyword('DESTROY')) +
             link_id +
             as_id
-        )
+        ).setParseAction(self.destroy_link_request_action)
         resonator_list = (
             OneOrMore(
                 Literal('R') +
@@ -116,7 +116,7 @@ class WorldsimParser(ParserElement):
             portalname +
             resonator_list +
             as_id
-        )
+        ).setParseAction(self.deploy_request_action)
         link_ref = pid | link_request
         field_ref = (
             pid | field_request
@@ -140,7 +140,9 @@ class WorldsimParser(ParserElement):
         deploy_ref = (pid | deploy_request)
     # <link-sequence> ::= <link-ref> [<link-sequence>]
         link_sequence = Forward()
-        link_sequence <<= link_ref + Optional(link_sequence)
+        link_sequence <<= (
+            link_ref + Optional(link_sequence)
+        ).setParseAction(self.link_sequence_action)
 
     # <intorfloat> ::= <digit>+ ['.' <digit>+]
     # <portalguid> ::= <id>
@@ -159,23 +161,25 @@ class WorldsimParser(ParserElement):
             destroy_portal_ref |
             deploy_ref |
             link_sequence
-        )
+        ).setParseAction(self.command_entry_action)
     # <command-sequence> ::= SEQ <command-entry> [<command-sequence>]
         command_sequence = Forward()
         command_sequence <<= (
             Suppress(Keyword("SEQ")) +
             command_entry +
             Optional(command_sequence)
-        )
+        ).setParseAction(self.command_sequence_action)
     # <locate-command> ::= LOCATE <portal> [AT] <latlng>
         locate_command = (
             Suppress(Keyword('LOCATE')) +
             portal +
             Suppress(Optional(Keyword('AT'))) +
             latlng
-        )
+        ).setParseAction(self.locate_command_action)
         # <move-command> ::= MOVE <latlng>
-        move_command = Suppress(Keyword('MOVE')) + latlng
+        move_command = (
+            Suppress(Keyword('MOVE')) + latlng
+        ).setParseAction(self.move_command_action)
         # self.parser = OneOrMore(
         #     command_entry ^
         #     portal_id ^
@@ -192,3 +196,37 @@ class WorldsimParser(ParserElement):
 
     def parseString(self, instring):
         return self.parser.parseString(instring)
+
+    # command hooks - subclass and override
+    def guid_command_action(self):
+        pass
+
+    def link_request_action(self):
+        pass
+
+    def field_request_action(self):
+        pass
+
+    def capture_request_action(self):
+        pass
+
+    def destroy_link_request_action(self):
+        pass
+
+    def deploy_request_action(self):
+        pass
+
+    def link_sequence_action(self):
+        pass
+
+    def command_entry_action(self):
+        pass
+
+    def command_sequence_action(self):
+        pass
+
+    def locate_command_action(self):
+        pass
+
+    def move_command_action(self):
+        pass
