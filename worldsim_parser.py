@@ -69,7 +69,7 @@ class WorldsimParser(ParserElement):
             portalname +
             Suppress(Literal('=') | Keyword('AS')) +
             pid
-        )
+        ).setParseAction(self.id_command_action)
         guid_command = (
             Suppress(Keyword('GUID')) +
             pid +
@@ -185,19 +185,25 @@ class WorldsimParser(ParserElement):
         #     portal_id ^
         #     guid_command
         # )
-        self.parser = (
-            portal_id ^
-            field_ref ^
-            link_request ^
-            locate_command ^
-            guid_command ^
-            move_command
+        self.parser = OneOrMore(
+            Group(
+                portal_id ^
+                field_ref ^
+                link_request ^
+                locate_command ^
+                guid_command ^
+                move_command
+            )
         )
 
     def parseString(self, instring):
         return self.parser.parseString(instring)
 
     # command hooks - subclass and override
+    def id_command_action(self, toks):
+        print "worldsim_parser: {}".format(toks)
+        pass
+
     def guid_command_action(self):
         pass
 
