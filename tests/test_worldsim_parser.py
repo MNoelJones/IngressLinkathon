@@ -46,9 +46,11 @@ class TestWorldsimPopulator(TestCase):
         """ After adding a portal to the world, it should be accessible """
         instring = """
             ID "Southern Entrance To War Memorial" AS 1
-            LOCATE 1 AT 51.258472N,  -1.076191E
-            GUID 1 47db8ce5d774463f9a8e7aef948e8093.16
         """
+        # """
+            # LOCATE 1 AT 51.258472N,  -1.076191E
+            # GUID 1 47db8ce5d774463f9a8e7aef948e8093.16
+        # """
         self.wspopulator.parse(instring)
         portal = self.wspopulator.world.portal[0]
         self.assertEqual(
