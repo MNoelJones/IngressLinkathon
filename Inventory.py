@@ -103,25 +103,26 @@ def levelproperty(cls):
         properties=["getter", "setter"]
     )
 
-    def new_class_generator(the_class=cls):
-        class new_class(the_class):
-            def __init__(self, *args, **kwargs):
-                super(new_class, self).__init__(*args, **kwargs)
+    def patcher(the_class=cls):
+        old_eq = the_class.__eq__
 
-            def __eq__(self, other):
-                state = super(new_class, self).__eq__(other)
-                try:
-                    state = state and (self.level == other.level)
-                except:
-                    pass
-                return state
+        def new_eq(self, other):
+            state = old_eq(self, other)
+            try:
+                state = state and (self.level == other.level)
+            except:
+                pass
+            return state
 
-            @classmethod
-            def has_level(cls):
-                return True
-        return new_class
+        the_class.__eq__ = new_eq
 
-    return decorator(new_class_generator())
+        def has_level(cls):
+            return True
+
+        setattr(the_class, "has_level", classmethod(has_level))
+
+    patcher(cls)
+    return decorator(cls)
 
 
 class Item(object):
@@ -467,14 +468,13 @@ class Inventory(object):
             plevel: {
                 cls._shortcode: cls
                 for cls in this_module.__dict__.values()
-                if isinstance(cls, type) and
+                if hasattr(cls, "_shortcode") and
                 (
-                    ("has_level" in cls.__dict__)
+                    hasattr(cls, "has_level")
                     if plevel == "level_items"
                     else
-                    ("has_level" not in cls.__dict__)
-                ) and
-                "_shortcode" in cls.__dict__
+                    not hasattr(cls, "has_level")
+                )
             }
             for plevel in ("level_items", "nolevel_items")
         }
