@@ -19,17 +19,17 @@ class TestAddItem(TestCase):
         self.inventory.add(item)
         self.assertEqual(self.inventory.invcount(), 1)
 
+
 class TestPopulatedInventory(TestCase):
     def setUp(self):
         self.inventory = Inventory.Inventory()
-        inventory = Inventory.Inventory()
         counts = {
             "Resonator": 10,
             "Mod": 5
         }
         for item, num in counts.iteritems():
             for _ in range(0, num):
-                inventory.add(getattr(Inventory, item)())
+                self.inventory.add(getattr(Inventory, item)())
 
     def test_item_count(self):
         """ With the above initialisation, invenetory count must be 15."""
@@ -37,19 +37,27 @@ class TestPopulatedInventory(TestCase):
 
     def test_resonator_count(self):
         """ ...and the resonator count should be 10."""
-        count = reduce(lambda a, b: a+b.invcount(), inventory.resonators, 0)
+        count = reduce(
+            lambda a, b: a + b.invcount(),
+            self.inventory.resonators,
+            0
+        )
         self.assertEqual(count, 10)
 
     def test_mod_count(self):
         """ ...and the mod count should be 5."""
-        count = reduce(lambda a, b: a+b.invcount(), inventory.mods, 0)
+        count = reduce(lambda a, b: a + b.invcount(), self.inventory.mods, 0)
         self.assertEqual(count, 5)
 
     def test_immediate_count(self):
-        self.assertEqual(inventory.invcount(), 15)
+        self.assertEqual(self.inventory.invcount(), 15)
 
     def test_capsule_addition(self):
-        """Adding a capsule with 5 items should make both item and inventory counts equal 21."""
+        """
+        Adding a capsule with 5 items.
+
+        Should make both item and inventory counts equal 6.
+        """
         capsule = Inventory.Capsule()
         for _ in range(0, 5):
             capsule.add(Inventory.Resonator())

@@ -1,5 +1,5 @@
 # test_worldsim_parser.py
-from unittest import TestCase, skip
+from unittest import TestCase  # , skip
 from worldsim_parser import WorldsimParser
 from worldsim_populator import WorldsimPopulator
 
@@ -48,8 +48,8 @@ class TestWorldsimPopulator(TestCase):
             ID "Southern Entrance To War Memorial" AS 1
         """
         # """
-            # LOCATE 1 AT 51.258472N,  -1.076191E
-            # GUID 1 47db8ce5d774463f9a8e7aef948e8093.16
+        # LOCATE 1 AT 51.258472N,  -1.076191E
+        # GUID 1 47db8ce5d774463f9a8e7aef948e8093.16
         # """
         self.wspopulator.parse(instring)
         portal = self.wspopulator.world.portal[0]
