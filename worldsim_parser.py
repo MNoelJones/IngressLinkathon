@@ -60,7 +60,7 @@ class WorldsimParser(ParserElement):
     def __init__(self):
         super(WorldsimParser, self).__init__()
         pid = Word(hexnums)
-        portalname = (quotedString)
+        portalname = (QuotedString('"') ^ QuotedString("'"))
         portalguid = Word(hexnums + '.' + hexnums, exact=35)
         as_id = Optional(Suppress(Keyword('AS')) + pid)
         link_id = pid

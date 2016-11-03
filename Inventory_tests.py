@@ -35,11 +35,11 @@ with given.a_populated_inventory:
 
     with then.inventory_count_of_resonators_is_10:
         the(
-            reduce(lambda a, b: a+b.invcount(), inventory.resonators, 0)
+            reduce(lambda a, b: a + b.invcount(), inventory.resonators, 0)
         ).should.equal(10)
     with then.inventory_count_of_mods_is_5:
         the(
-            reduce(lambda a, b: a+b.invcount(), inventory.mods, 0)
+            reduce(lambda a, b: a + b.invcount(), inventory.mods, 0)
         ).should.equal(5)
 
     with then.immediate_inventory_count_is_15:
