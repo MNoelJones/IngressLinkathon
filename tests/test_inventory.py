@@ -1,5 +1,6 @@
 """Inventory BDD Tests."""
 from unittest import TestCase
+from nose2.tools import params
 import Inventory
 
 
@@ -78,3 +79,60 @@ class TestPopulatedInventory(TestCase):
 
         self.assertEqual(self.inventory.itemcount(), 21)
         self.assertEqual(self.inventory.invcount(), 16)
+
+
+class TestProcessTransaction(TestCase):
+    def setUp(self):
+        self.inventory = Inventory.Inventory()
+
+    @params(
+        (
+            "individual item",
+            "CR INV 5 X8",
+            {
+                "bursters": (8, 5)
+            }
+        ),
+        (
+            "multiple items",
+            "CR INV 5 X8 3 R6",
+            {
+                "bursters": (8, 5),
+                "resonators": (6, 3)
+            }
+        )
+    )
+    def test_credit_transaction(self, name, transaction, conditions):
+        self.inventory.apply_transaction(transaction)
+        for prop, condition in conditions.iteritems():
+            self.assertEqual(len(getattr(self.inventory, prop)), condition[1])
+            self.assertTrue(all(x.level == condition[0] for x in getattr(self.inventory, prop)))
+
+    def test_debit_transation(self):
+        self.inventory.apply_transaction("CR INV 5 X8")
+        self.assertEqual(len(self.inventory.bursters), 5)
+
+        transaction = "DR INV 3 X8"
+        self.inventory.apply_transaction(transaction)
+        self.assertEqual(len(self.inventory.bursters), 2)
+        self.assertTrue(all(x.level == 8 for x in self.inventory.bursters))
+
+    def test_debit_guid_transaction(self):
+        for guid in ("AABBAABB", "9FD860A1"):
+            # Add a Capsule with a GUID
+            capsule = Inventory.Capsule()
+            capsule.guid = guid
+            self.inventory.add(capsule)
+        transaction = "CR 9FD860A1 5 X8"
+        self.inventory.apply_transaction(transaction)
+        self.assertTrue(all(x.level == 8 for x in self.inventory.capsules["9FD860A1"]))
+        self.assertEqual(len(self.inventory.capsules["9FD860A1"].bursters), 5)
+
+        transaction = "DR 9FD860A1 3 X8"
+        self.inventory.apply_transaction(transaction)
+        self.assertTrue(all(x.level == 8 for x in self.inventory.capsules["9FD860A1"]))
+        self.assertEqual(len(self.inventory.capsules["9FD860A1"].bursters), 2)
+        self.assertEqual(len(self.inventory.capsules["AABBAABB"].bursters), 0)
+
+    def test_stored_transaction(self):
+        self.fail()
