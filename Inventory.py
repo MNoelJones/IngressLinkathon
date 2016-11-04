@@ -128,7 +128,7 @@ def levelproperty(cls):
 class Item(object):
     """ A virtual class container for all Inventory item types """
     def __init__(self):
-        self._shortcode = None
+        pass
 
     def itemcount(self):
         return 1
