@@ -307,8 +307,8 @@ class Container(Item):
 
 class MUFG(Container):
     """ """
-    def __init__(self):
-        super(Capsule, self).__init__()
+    def __init__(self, guid=None):
+        super(MUFG, self).__init__(guid=guid)
         self._restricted_items = [
             Resonator,
             Key,
@@ -321,8 +321,8 @@ class MUFG(Container):
 
 class Capsule(Container):
     """ """
-    def __init__(self):
-        super(Capsule, self).__init__()
+    def __init__(self, guid=None):
+        super(Capsule, self).__init__(guid=guid)
         self._restricted_items = [
             Resonator,
             Key,
@@ -334,8 +334,8 @@ class Capsule(Container):
 
 
 class KeyCapsule(Container):
-    def __init__(self):
-        super(KeyCapsule, self).__init__()
+    def __init__(self, guid=None):
+        super(KeyCapsule, self).__init__(guid=guid)
         self._restricted_items = [
             Key,
         ]
@@ -506,7 +506,10 @@ class Inventory(object):
             "shields": Shield,
         }
         property_map_dicts = {
-            "capsules": Capsule
+            "capsules": Capsule,
+            "mufgs": MUFG,
+            "keycaps": KeyCapsule,
+            "containers": Container,
         }
         if name in self.__dict__:
             return self.__dict__[name]
