@@ -141,6 +141,13 @@ class Item(object):
             return True
         return False
 
+    def __str__(self):
+        return "{}{}{}".format(
+            self.rarity.shortcode if hasattr(self, "has_rarity") and self.rarity is not None else "",
+            self.shortcode,
+            self.level if hasattr(self, "has_level") else ""
+        )
+
 
 class Rarity(object):
     """
@@ -148,7 +155,7 @@ class Rarity(object):
         This is a virtual class for all Rarity levels
     """
     def __init__(self):
-        self._shortcode = None
+        pass
 
     def __eq__(self, other):
         if self.__class__ == other.__class__:
@@ -267,10 +274,10 @@ class Container(Item):
         return [x for x in self._inventory if isinstance(x, PowerCube)]
 
     def itemcount(self):
-        return len(self.contents) + 1
+        return len(self.contents)
 
     def invcount(self):
-        return self.itemcount()
+        return self.itemcount() + 1
 
     def add(self, item):
         assert(any([isinstance(item, x) for x in self._restricted_items]))
@@ -351,6 +358,12 @@ class Weapon(Item):
         super(Weapon, self).__init__()
         self.rarity = VeryCommon()
 
+    def __str__(self):
+        return "{}{}".format(
+            self.shortcode,
+            self.level if hasattr(self, "has_level") else ""
+        )
+
 
 @levelproperty
 @setshortcode("X")
@@ -375,12 +388,14 @@ class Virus(Weapon):
         self.rarity = VeryRare()
 
 
+@setshortcode("ADA")
 class Ada(Virus):
     """ """
     def __init__(self):
         super(Ada, self).__init__()
 
 
+@setshortcode("JARVIS")
 class Jarvis(Virus):
     """ """
     def __init__(self):
@@ -438,6 +453,7 @@ class LinkAmp(Mod):
         self.rarity = Rare()
 
 
+@setshortcode("SBUL")
 class SoftBankUltraLink(LinkAmp):
     def __init__(self):
         super(SoftBankUltraLink, self).__init__()
@@ -616,7 +632,7 @@ class Inventory(object):
                 r'(?P<amount>\d+)\s+'
                 r'(?:'
                 r'(?P<lshortcode>(?:{}))(?P<level>\d)|'
-                r'(?P<rarity>{})(?P<nlshortcode>(?:{}))'
+                r'(?P<rarity>{})?(?P<nlshortcode>(?:{}))'
                 r')\s*'
             ).format(
                 '|'.join(x for x in self._shortcodes["level_items"]),

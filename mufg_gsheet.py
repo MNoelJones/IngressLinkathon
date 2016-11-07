@@ -2,8 +2,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from collections import namedtuple
 
-class MUFG_Gsheet(object):
 
+class MUFG_Gsheet(object):
     def __init__(self, creds_file=None):
         scope = ["https://spreadsheets.google.com/feeds"]
         if creds_file is None:
@@ -20,7 +20,7 @@ class MUFG_Gsheet(object):
         self.keycap_cols_start_end = ("G", "K")
         self.mufg_cols_start_end = ("L", "X")
         self.cap_cols_start_end = ("Z", "AV")
-        self.data_rows_start_end = (5, 57)
+        self.data_rows_start_end = (5, 56)
         self.init()
 
     def init(self):
@@ -61,7 +61,7 @@ class MUFG_Gsheet(object):
             " ".join([
                 "{} {}".format(count, name)
                 for name, count in col_vals._asdict().iteritems()
-                if count not in ('', '0', None)
+                if count not in ('', '0', None) and name not in "Keys"
             ])
         )
         return tx
@@ -71,18 +71,17 @@ class MUFG_Gsheet(object):
 
 
 def main():
-    from Inventory import Inventory, MUFG
+    from Inventory import Inventory, MUFG, Capsule
 
     inv = Inventory()
     mufg_sht = MUFG_Gsheet()
-    tx = mufg_sht.get_init_transaction_from_column(mufg_sht.mufg.col_values(mufg_sht.mufg.get_int_addr("F1")[1]))
+    inv_colnum = mufg_sht.mufg.get_int_addr("F1")[1]
+    tx = mufg_sht.get_init_transaction_from_column(inv_colnum)
     inv.apply_transaction(tx)
 
     mufgs = mufg_sht.get_mufg_guids()
-    txs = []
     for colnum, guid in mufgs:
-        txs.append((guid, mufg_sht.get_init_transaction_from_column(colnum, target=guid)))
-    for guid, tx in txs:
+        tx = mufg_sht.get_init_transaction_from_column(colnum, target=guid)
         inv.add(MUFG(guid))
         inv.apply_transaction(tx)
     for guid in inv.mufgs:
@@ -92,6 +91,20 @@ def main():
                 x.level if hasattr(x, "has_level") else ""
             )
             for x in inv.mufgs[guid].contents
+        )
+    caps = mufg_sht.get_capsule_guids()
+    for colnum, guid in caps:
+        tx = mufg_sht.get_init_transaction_from_column(colnum, target=guid)
+        inv.add(Capsule(guid))
+        inv.apply_transaction(tx)
+    for guid in inv.capsules:
+        print ", ".join(
+            "{}{}{}".format(
+                x.rarity if hasattr(x, "has_rarity") else "",
+                x.shortcode,
+                x.level if hasattr(x, "has_level") else ""
+            )
+            for x in inv.capsules[guid].contents
         )
 
 
