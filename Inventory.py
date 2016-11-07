@@ -387,6 +387,11 @@ class Virus(Weapon):
         super(Virus, self).__init__()
         self.rarity = VeryRare()
 
+    def __str__(self):
+        return "{}".format(
+            self.shortcode,
+        )
+
 
 @setshortcode("ADA")
 class Ada(Virus):
@@ -439,10 +444,16 @@ class Shield(Mod):
         super(Shield, self).__init__()
 
 
+@setshortcode("AXA")
 class AxaShield(Shield):
     def __init__(self):
         super(AxaShield, self).__init__()
         self.rarity = VeryRare()
+
+    def __str__(self):
+        return "{}".format(
+            self.shortcode,
+        )
 
 
 @setshortcode("LA")
@@ -451,6 +462,11 @@ class LinkAmp(Mod):
     def __init__(self):
         super(LinkAmp, self).__init__()
         self.rarity = Rare()
+
+    def __str__(self):
+        return "{}".format(
+            self.shortcode,
+        )
 
 
 @setshortcode("SBUL")

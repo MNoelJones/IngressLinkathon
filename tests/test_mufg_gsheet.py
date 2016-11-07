@@ -37,11 +37,11 @@ class TestMUFGGsheet(TestCase):
                 print "Empty."
             print "itemcount {} == sheet count {}".format(
                 inv.mufgs[guid].itemcount(),
-                int(mufg_sht.mufg.cell(colnum, 4).value)
+                int(mufg_sht.mufg.cell(4, colnum).value)
             )
             self.assertEqual(
                 inv.mufgs[guid].itemcount(),
-                int(mufg_sht.mufg.cell(colnum, 4).value)
+                int(mufg_sht.mufg.cell(4, colnum).value)
             )
 
     def test_populate_capsules(self):
@@ -61,5 +61,5 @@ class TestMUFGGsheet(TestCase):
                 print "Empty."
             self.assertEqual(
                 self.inv.capsules[guid].itemcount(),
-                int(self.mufg_sht.mufg.cell(colnum, 4).value)
+                int(self.mufg_sht.mufg.cell(4, colnum).value)
             )
