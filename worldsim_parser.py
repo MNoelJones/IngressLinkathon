@@ -5,7 +5,7 @@ from pyparsing import pyparsing_common as ppc
 identifier = ppc.identifier
 integer = ppc.integer
 real = ppc.real
-numeric = ppc.numeric
+numeric = ppc.number
 
 """ BNF:
 <pid> ::= <numeric>

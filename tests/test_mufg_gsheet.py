@@ -7,7 +7,9 @@ from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
 class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
-        self.mufg_sht = MUFG_Gsheet()
+        self.mufg_sht = MUFG_Gsheet(
+            creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
+        )
 
     def test_populate_inventory(self):
         inv_colnum = self.mufg_sht.mufg.get_int_addr("F1")[1]
@@ -97,4 +99,16 @@ class TestMUFGGsheet(TestCase):
             "guid": 5,
             "area": 8,
         }
-        k = Key()
+        for row in range(*self.mufg_sht.data_rows_start_end):
+            vals = self.mufg_sht.keys.range(
+                self.mufg_sht.keys.get_addr_int(row, 1) + ":" +
+                self.mufg_sht.keys.get_addr_int(row, 8)
+            )
+            d = {
+                prop: vals[col - 1]
+                for prop, col in key_info.iteritems()
+                if prop != "latlng"
+            }
+            k = Key(**d)
+            self.assertEqual(k.title, vals[1])
+            self.assertEqual(k.guid, vals[5])
