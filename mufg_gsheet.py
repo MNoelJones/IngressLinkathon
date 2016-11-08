@@ -1,6 +1,7 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from collections import namedtuple
+from Inventory import Portal, Key
 
 
 class MUFG_Gsheet(object):
@@ -21,6 +22,8 @@ class MUFG_Gsheet(object):
         self.mufg_cols_start_end = ("L", "X")
         self.cap_cols_start_end = ("Z", "AV")
         self.data_rows_start_end = (5, 56)
+        self.key_rows_start_end = [None, None]
+        self._portal_list = None
         self.init()
 
     def init(self):
@@ -32,6 +35,18 @@ class MUFG_Gsheet(object):
             "MufgTuple",
             self._data_values(1)
         )
+        self.key_rows_start_end[0] = int(self.keys.cell(1, 10).value)
+        self.key_rows_start_end[1] = int(self.keys.cell(2, 10).value)
+
+    @property
+    def portal_list(self):
+        if self._portal_list is None:
+            self._portal_list = self.get_portal_list()
+        return self._portal_list
+
+    def refresh_portal_list(self):
+        self._portal_list = None
+        return self.portal_list
 
     def _data_values(self, col_num):
         return self.mufg.col_values(col_num)[self.data_rows_start_end[0]:self.data_rows_start_end[1]]
@@ -53,6 +68,48 @@ class MUFG_Gsheet(object):
     def get_capsule_guids(self):
         rng = self.mufg.range("{}2:{}2".format(*self.cap_cols_start_end))
         return [(x.col, x.value) for x in rng]
+
+    def gen_lat_lng_from_strings(self, latlng_tpl_s):
+        lat = latlng_tpl_s[0]
+        lng = latlng_tpl_s[1]
+        if not lat or lat == "":
+            lat = 0
+        if not lng or lng == "":
+            lng = 0
+        latlng = {
+            "lat": int(lat),
+            "lng": int(lng)
+        }
+        return latlng
+
+    def get_portal_list(self):
+        key_info = {
+            "title": 1,
+            "note": 2,
+            "latlng": {"lat": 3, "lng": 4},
+            "guid": 5,
+            "area": 8,
+        }
+        portal_list = []
+        for row in range(*self.key_rows_start_end):
+            vals = self.keys.range(
+                self.keys.get_addr_int(row, 1) + ":" +
+                self.keys.get_addr_int(row, 8)
+            )
+            d = {
+                prop: vals[col - 1].value
+                for prop, col in key_info.iteritems()
+                if prop != "latlng"
+            }
+            latlng = self.gen_lat_lng_from_strings((
+                vals[key_info["latlng"]["lat"] - 1].value,
+                vals[key_info["latlng"]["lng"] - 1].value
+            ))
+            d["latlng"] = latlng
+            p = Portal(**d)
+            k = Key(portal=p)
+            portal_list.append((row, k))
+        return portal_list
 
     def get_init_transaction_from_column(self, col_number, target="INV"):
         col_vals = self.get_colnum_data(col_number)

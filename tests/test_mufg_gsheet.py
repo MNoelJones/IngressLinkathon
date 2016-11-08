@@ -1,14 +1,14 @@
 """test_mufg_gsheet.py"""
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
-from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
+from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule, Portal
 
 
 class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
         self.mufg_sht = MUFG_Gsheet(
-            creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
+            # creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
         )
 
     def test_populate_inventory(self):
@@ -29,11 +29,6 @@ class TestMUFGGsheet(TestCase):
             print "Adding MUFG with guid {}, contents: {}".format(guid, tx)
             inv.add(MUFG(guid))
             inv.apply_transaction(tx)
-            # m = re.search(r"(\d+) KEY", tx)
-            # if m:
-            #     print "Adding {} keys.".format(m.group(1))
-            #     for _ in range(int(m.group(1))):
-            #         inv.mufgs[guid].add(Key())
         for colnum, guid in mufgs:
             print guid,
             if len(inv.mufgs[guid]):
@@ -91,24 +86,32 @@ class TestMUFGGsheet(TestCase):
                 int(self.mufg_sht.mufg.cell(4, colnum).value)
             )
 
-    def test_generate_key(self):
-        key_info = {
-            "title": 1,
-            "note": 2,
-            "latlng": {"lat": 3, "lng": 4},
-            "guid": 5,
-            "area": 8,
+    def gen_lat_lng_from_strings(self, latlng_tpl_s):
+        lat = latlng_tpl_s[0]
+        lng = latlng_tpl_s[1]
+        if not lat or lat == "":
+            lat = 0
+        if not lng or lng == "":
+            lng = 0
+        latlng = {
+            "lat": int(lat),
+            "lng": int(lng)
         }
-        for row in range(*self.mufg_sht.data_rows_start_end):
+        return latlng
+
+    def test_generate_key(self):
+        portal_list = self.mufg_sht.get_portal_list()
+        for row, portal in portal_list:
             vals = self.mufg_sht.keys.range(
                 self.mufg_sht.keys.get_addr_int(row, 1) + ":" +
                 self.mufg_sht.keys.get_addr_int(row, 8)
             )
-            d = {
-                prop: vals[col - 1]
-                for prop, col in key_info.iteritems()
-                if prop != "latlng"
-            }
-            k = Key(**d)
-            self.assertEqual(k.title, vals[1])
-            self.assertEqual(k.guid, vals[5])
+            k = Key(portal=portal)
+            self.assertEqual(k.title, vals[0].value)
+            self.assertEqual(k.guid, vals[4].value)
+            print("{} [{}] (@{}, {})").format(
+                k.guid or "MISSING GUID",
+                k.title,
+                "UNK" if not k.latlng else k.latlng["lat"],
+                "UNK" if not k.latlng else k.latlng["lng"]
+            )

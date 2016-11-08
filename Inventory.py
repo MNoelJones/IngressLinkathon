@@ -203,9 +203,14 @@ class Portal(object):
 @setshortcode("KEY")
 class Key(Item):
     """ """
-    def __init__(self, portal=None):
+    def __init__(self, portal=None, **kwargs):
         super(Key, self).__init__()
-        self._portal = portal
+        if portal:
+            self._portal = portal
+        elif kwargs:
+            self._portal = Portal(**kwargs)
+        else:
+            self._portal = None
 
     @property
     def guid(self):
@@ -215,9 +220,30 @@ class Key(Item):
             return None
 
     @property
+    def title(self):
+        try:
+            return self.portal.title
+        except AttributeError:
+            return None
+
+    @property
     def area(self):
         try:
             return self.portal.area
+        except AttributeError:
+            return None
+
+    @property
+    def note(self):
+        try:
+            return self.portal.note
+        except AttributeError:
+            return None
+
+    @property
+    def latlng(self):
+        try:
+            return self.portal.latlng
         except AttributeError:
             return None
 
