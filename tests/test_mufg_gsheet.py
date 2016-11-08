@@ -1,7 +1,8 @@
 """test_mufg_gsheet.py"""
+import re
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
-from Inventory import Inventory, MUFG, Capsule
+from Inventory import Inventory, MUFG, Capsule, Key
 
 
 class TestMUFGGsheet(TestCase):
@@ -24,9 +25,14 @@ class TestMUFGGsheet(TestCase):
         mufgs = mufg_sht.get_mufg_guids()
         for colnum, guid in mufgs:
             tx = mufg_sht.get_init_transaction_from_column(colnum, target=guid)
+            print "Adding MUFG with guid {}, contents: {}".format(guid, tx)
             inv.add(MUFG(guid))
             inv.apply_transaction(tx)
-            print "Adding MUFG with guid {}, contents: {}".format(guid, tx)
+            # m = re.search(r"(\d+) KEY", tx)
+            # if m:
+            #     print "Adding {} keys.".format(m.group(1))
+            #     for _ in range(int(m.group(1))):
+            #         inv.mufgs[guid].add(Key())
         for colnum, guid in mufgs:
             print guid,
             if len(inv.mufgs[guid]):

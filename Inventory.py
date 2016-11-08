@@ -191,6 +191,7 @@ class VeryRare(Rarity):
         super(VeryRare, self).__init__()
 
 
+@setshortcode("KEY")
 class Key(Item):
     """ """
     def __init__(self):
@@ -209,13 +210,32 @@ class Powerup(Item):
         super(Powerup, self).__init__()
 
 
-@levelproperty
 @rarityproperty
+class PowerCubeItem(Item):
+    """ """
+    def __init__(self):
+        super(Item, self).__init__()
+
+
+@levelproperty
 @setshortcode("P")
-class PowerCube(Item):
+class PowerCube(PowerCubeItem):
     """ """
     def __init__(self):
         super(PowerCube, self).__init__()
+
+
+@setshortcode("LUBE")
+class LawsonPowerCube(PowerCubeItem):
+    """ """
+    def __init__(self):
+        super(LawsonPowerCube, self).__init__()
+        self.rarity = VeryRare()
+
+    def __str__(self):
+        return "{}".format(
+            self.shortcode,
+        )
 
 
 @levelproperty
@@ -245,6 +265,38 @@ class Container(Item):
     def __len__(self):
         return len(self.contents)
 
+    def __getattr__(self, name):
+        property_map_lists = {
+            "resonators": Resonator,
+            "weapons": Weapon,
+            "bursters": Burster,
+            "mods": Mod,
+            "powercubes": PowerCube,
+            "shields": Shield,
+            "keys": Key,
+        }
+        property_map_dicts = {
+            "capsules": Capsule,
+            "mufgs": MUFG,
+            "keycaps": KeyCapsule,
+            "containers": Container,
+        }
+        if name in self.__dict__:
+            return self.__dict__[name]
+        if name in property_map_lists:
+            return [
+                x for x in self.contents
+                if isinstance(x, property_map_lists[name])
+            ]
+        if name in property_map_dicts:
+            return {
+                x.guid: x for x in self.contents
+                if isinstance(x, property_map_dicts[name])
+            }
+        raise AttributeError(
+            "No attribute {} on {}".format(name, type(self).__name__)
+        )
+
     @property
     def contents(self):
         return self._contents
@@ -252,26 +304,6 @@ class Container(Item):
     @contents.setter
     def contents(self, val):
         self._contents = val
-
-    @property
-    def resonators(self):
-        return [x for x in self._contents if isinstance(x, Resonator)]
-
-    @property
-    def weapons(self):
-        return [x for x in self._contents if isinstance(x, Weapon)]
-
-    @property
-    def bursters(self):
-        return [x for x in self.weapons if isinstance(x, Burster)]
-
-    @property
-    def mods(self):
-        return [x for x in self._inventory if isinstance(x, Mod)]
-
-    @property
-    def powercubes(self):
-        return [x for x in self._inventory if isinstance(x, PowerCube)]
 
     def itemcount(self):
         return len(self.contents)
@@ -320,7 +352,7 @@ class MUFG(Container):
             Resonator,
             Key,
             Media,
-            PowerCube,
+            PowerCubeItem,
             Mod,
             Weapon,
         ]
@@ -334,7 +366,7 @@ class Capsule(Container):
             Resonator,
             Key,
             Media,
-            PowerCube,
+            PowerCubeItem,
             Mod,
             Weapon,
         ]
@@ -536,6 +568,7 @@ class Inventory(object):
             "mods": Mod,
             "powercubes": PowerCube,
             "shields": Shield,
+            "keys": Key,
         }
         property_map_dicts = {
             "capsules": Capsule,

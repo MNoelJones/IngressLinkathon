@@ -62,7 +62,7 @@ class MUFG_Gsheet(object):
                 "{} {}".format(count, name)
                 for name, count in col_vals._asdict().iteritems()
                 if count not in ('', '0', None) and name not in "Keys"
-            ])
+            ] + ["" if col_vals.Keys == "0" else "{} KEY".format(col_vals.Keys)])
         )
         return tx
 
