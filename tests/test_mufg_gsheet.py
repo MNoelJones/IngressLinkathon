@@ -1,8 +1,7 @@
 """test_mufg_gsheet.py"""
-import re
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
-from Inventory import Inventory, MUFG, Capsule, Key
+from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
 
 
 class TestMUFGGsheet(TestCase):
@@ -69,3 +68,33 @@ class TestMUFGGsheet(TestCase):
                 self.inv.capsules[guid].itemcount(),
                 int(self.mufg_sht.mufg.cell(4, colnum).value)
             )
+
+    def test_populate_keycapsules(self):
+        caps = self.mufg_sht.get_keycap_guids()
+        for colnum, guid in caps:
+            tx = self.mufg_sht.get_init_transaction_from_column(colnum, target=guid)
+            self.inv.add(KeyCapsule(guid))
+            self.inv.apply_transaction(tx)
+            print "Adding Capsule with guid {}, contents: {}".format(guid, tx)
+        for colnum, guid in caps:
+            print guid,
+            if len(self.inv.keycaps[guid]):
+                print ", ".join(
+                    str(x) for x in self.inv.keycaps[guid].contents
+                )
+            else:
+                print "Empty."
+            self.assertEqual(
+                self.inv.keycaps[guid].itemcount(),
+                int(self.mufg_sht.mufg.cell(4, colnum).value)
+            )
+
+    def test_generate_key(self):
+        key_info = {
+            "title": 1,
+            "note": 2,
+            "latlng": {"lat": 3, "lng": 4},
+            "guid": 5,
+            "area": 8,
+        }
+        k = Key()

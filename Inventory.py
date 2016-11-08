@@ -29,7 +29,6 @@ def setter_factory(name, prefix="_"):
 
 def decorator_factory(
     name,
-    prefix=True,
     properties=None,
     default_value=None
 ):
@@ -45,18 +44,17 @@ def decorator_factory(
         if 'getter' in properties:
             getter = getter_factory(
                 name,
-                prefix="_" if prefix else "",
                 default_value=default_value
             )
         if 'setter' in properties:
-            setter = setter_factory(name, prefix="_" if prefix else "")
+            setter = setter_factory(name)
 
         prop = property(getter, setter)
         if properties:
             setattr(cls, name, prop)
             set_prefixed_attrs(cls, name, default_value)
         else:
-            set_prefixed_attrs(cls, name, default_value, prefix=prefix)
+            set_prefixed_attrs(cls, name, default_value)
         return cls
     return decorator
 
@@ -64,7 +62,6 @@ def decorator_factory(
 def setshortcode(code):
     decorator = decorator_factory(
         "shortcode",
-        prefix=True,
         default_value=code,
         properties=["getter"]
     )
@@ -75,7 +72,6 @@ def setshortcode(code):
 def guidproperty(cls):
     decorator = decorator_factory(
         "guid",
-        prefix=True,
         properties=["getter", "setter"]
     )
 
@@ -87,7 +83,6 @@ def guidproperty(cls):
 def rarityproperty(cls):
     decorator = decorator_factory(
         "rarity",
-        prefix=True,
         properties=["getter", "setter"]
     )
 
@@ -99,7 +94,6 @@ def rarityproperty(cls):
 def levelproperty(cls):
     decorator = decorator_factory(
         "level",
-        prefix=True,
         properties=["getter", "setter"]
     )
 
@@ -191,11 +185,41 @@ class VeryRare(Rarity):
         super(VeryRare, self).__init__()
 
 
+@guidproperty
+@decorator_factory("title", properties=["getter", "setter"])
+@decorator_factory("area", properties=["getter", "setter"])
+@decorator_factory("note", properties=["getter", "setter"])
+@decorator_factory("latlng", properties=["getter", "setter"])
+class Portal(object):
+    def __init__(self, guid=None, title=None, area=None, note=None, latlng=None):
+        self._guid = guid
+        self._title = title
+        self._area = area
+        self._note = note
+        self._latlng = latlng
+
+
+@decorator_factory("portal", properties=["getter", "setter"])
 @setshortcode("KEY")
 class Key(Item):
     """ """
-    def __init__(self):
+    def __init__(self, portal=None):
         super(Key, self).__init__()
+        self._portal = portal
+
+    @property
+    def guid(self):
+        try:
+            return self.portal.guid
+        except AttributeError:
+            return None
+
+    @property
+    def area(self):
+        try:
+            return self.portal.area
+        except AttributeError:
+            return None
 
 
 class Media(Item):
@@ -246,6 +270,12 @@ class Resonator(Item):
     def __init__(self):
         super(Resonator, self).__init__()
         self.rarity = VeryCommon()
+
+    def __str__(self):
+        return "{}{}".format(
+            self.shortcode,
+            self.level
+        )
 
 
 @guidproperty
@@ -656,10 +686,8 @@ class Inventory(object):
 
     def apply_transaction(self, transaction):
         tx_re = re.compile(
-            (
-             r'(?P<crdr>CR|DR)\s+(?P<target>\w+)\s+'
-             r'(?P<transaction>(?:\d+\s+\w+\d?\s*)+)'
-            )
+            r'(?P<crdr>CR|DR)\s+(?P<target>\w+)\s+'
+            r'(?P<transaction>(?:\d+\s+\w+\d?\s*)+)'
         )
         operations = {
             "CR": "add",
@@ -704,7 +732,7 @@ class Inventory(object):
                     item.level = int(match.group("level"))
 
                 try:
-                    item.rarity = self._raritycodes[match.group("rarity")]
+                    item.rarity = self._raritycodes[match.group("rarity")]()
                 except KeyError:
                     pass
                 getattr(target, operation)(item)
