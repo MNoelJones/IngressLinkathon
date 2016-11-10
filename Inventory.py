@@ -212,6 +212,15 @@ class Key(Item):
         else:
             self._portal = None
 
+    def __str__(self):
+        out = "KEY{}"
+        additional = []
+        if self.title is not None:
+            additional.append("{}".format(self.title))
+        if self.guid is not None:
+            additional.append("<{}>".format(self.guid))
+        return out.format("[" + " ".join(additional) + "]" if additional else "")
+
     @property
     def guid(self):
         try:

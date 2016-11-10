@@ -1,7 +1,8 @@
 """test_mufg_gsheet.py"""
+import re
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
-from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule, Portal
+from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
 
 
 class TestMUFGGsheet(TestCase):
@@ -86,19 +87,6 @@ class TestMUFGGsheet(TestCase):
                 int(self.mufg_sht.mufg.cell(4, colnum).value)
             )
 
-    def gen_lat_lng_from_strings(self, latlng_tpl_s):
-        lat = latlng_tpl_s[0]
-        lng = latlng_tpl_s[1]
-        if not lat or lat == "":
-            lat = 0
-        if not lng or lng == "":
-            lng = 0
-        latlng = {
-            "lat": int(lat),
-            "lng": int(lng)
-        }
-        return latlng
-
     def test_generate_key(self):
         portal_list = self.mufg_sht.get_portal_list()
         for row, portal in portal_list:
@@ -115,3 +103,23 @@ class TestMUFGGsheet(TestCase):
                 "UNK" if not k.latlng else k.latlng["lat"],
                 "UNK" if not k.latlng else k.latlng["lng"]
             )
+
+    def test_populate_keylocker_keys(self):
+        caps = self.mufg_sht.get_keycap_guids()
+        for colnum, guid in caps:
+            key_col = self.mufg_sht.keys.find(re.compile(guid)).col
+
+            rng_addr = "{}:{}".format(
+                self.mufg_sht.keys.get_addr_int(self.mufg_sht.key_rows_start_end[0], key_col),
+                self.mufg_sht.keys.get_addr_int(self.mufg_sht.key_rows_start_end[1], key_col)
+            )
+
+            rng = self.mufg_sht.keys.range(rng_addr)
+            values = [
+                Key(portal=p[1])
+                for p, x in zip(self.mufg_sht.portal_list, rng)
+                if x.value is not None and x.value != '0'
+            ]
+            keycount = len(values)
+            self.assertEqual(int(self.mufg_sht.keys.cell(3, key_col).value), keycount)
+            print [str(v) for v in values]
