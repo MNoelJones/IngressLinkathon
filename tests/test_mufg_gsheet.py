@@ -1,4 +1,4 @@
-"""test_mufg_gsheet.py"""
+"""test_mufg_gsheet.py."""
 import re
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
@@ -9,7 +9,7 @@ class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
         self.mufg_sht = MUFG_Gsheet(
-            # creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
+            creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
         )
 
     def test_populate_inventory(self):
@@ -18,7 +18,9 @@ class TestMUFGGsheet(TestCase):
         self.inv.apply_transaction(tx)
         self.assertEqual(
             self.inv.itemcount(),
-            int(self.mufg_sht.mufg.cell(*self.mufg_sht.mufg.get_int_addr("F4")).value)
+            int(self.mufg_sht.mufg.cell(
+                *self.mufg_sht.mufg.get_int_addr("F4")
+            ).value)
         )
 
     def test_populate_mufgs(self):
@@ -50,7 +52,10 @@ class TestMUFGGsheet(TestCase):
     def test_populate_capsules(self):
         caps = self.mufg_sht.get_capsule_guids()
         for colnum, guid in caps:
-            tx = self.mufg_sht.get_init_transaction_from_column(colnum, target=guid)
+            tx = self.mufg_sht.get_init_transaction_from_column(
+                colnum,
+                target=guid
+            )
             self.inv.add(Capsule(guid))
             self.inv.apply_transaction(tx)
             print "Adding Capsule with guid {}, contents: {}".format(guid, tx)
@@ -70,7 +75,10 @@ class TestMUFGGsheet(TestCase):
     def test_populate_keycapsules(self):
         caps = self.mufg_sht.get_keycap_guids()
         for colnum, guid in caps:
-            tx = self.mufg_sht.get_init_transaction_from_column(colnum, target=guid)
+            tx = self.mufg_sht.get_init_transaction_from_column(
+                colnum,
+                target=guid
+            )
             self.inv.add(KeyCapsule(guid))
             self.inv.apply_transaction(tx)
             print "Adding Capsule with guid {}, contents: {}".format(guid, tx)
@@ -110,8 +118,14 @@ class TestMUFGGsheet(TestCase):
             key_col = self.mufg_sht.keys.find(re.compile(guid)).col
 
             rng_addr = "{}:{}".format(
-                self.mufg_sht.keys.get_addr_int(self.mufg_sht.key_rows_start_end[0], key_col),
-                self.mufg_sht.keys.get_addr_int(self.mufg_sht.key_rows_start_end[1], key_col)
+                self.mufg_sht.keys.get_addr_int(
+                    self.mufg_sht.key_rows_start_end[0],
+                    key_col
+                ),
+                self.mufg_sht.keys.get_addr_int(
+                    self.mufg_sht.key_rows_start_end[1],
+                    key_col
+                )
             )
 
             rng = self.mufg_sht.keys.range(rng_addr)
@@ -121,5 +135,8 @@ class TestMUFGGsheet(TestCase):
                 if x.value is not None and x.value != '0'
             ]
             keycount = len(values)
-            self.assertEqual(int(self.mufg_sht.keys.cell(3, key_col).value), keycount)
-            print [str(v) for v in values]
+            self.assertEqual(
+                int(self.mufg_sht.keys.cell(3, key_col).value),
+                keycount
+            )
+            print list(str(v) for v in values)

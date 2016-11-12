@@ -49,7 +49,10 @@ class MUFG_Gsheet(object):
         return self.portal_list
 
     def _data_values(self, col_num):
-        return self.mufg.col_values(col_num)[self.data_rows_start_end[0]:self.data_rows_start_end[1]]
+        return self.mufg.col_values(col_num)[
+            self.data_rows_start_end[0]:
+            self.data_rows_start_end[1]
+        ]
 
     def get_colnum_data(self, col_number):
         return MUFG_Gsheet.MufgTuple._make(self._data_values(col_number))
@@ -91,11 +94,16 @@ class MUFG_Gsheet(object):
             "area": 8,
         }
         portal_list = []
-        for row in range(*self.key_rows_start_end):
-            vals = self.keys.range(
-                self.keys.get_addr_int(row, 1) + ":" +
-                self.keys.get_addr_int(row, 8)
-            )
+        portal_data = self.keys.range(
+            self.keys.get_addr_int(self.key_rows_start_end[0], 1) +
+            ":" +
+            self.keys.get_addr_int(self.key_rows_start_end[1], 8)
+        )
+        portal_info = [
+            portal_data[i:i + 8]
+            for i in range(0, len(portal_data), 8)
+        ]
+        for vals in portal_info:
             d = {
                 prop: vals[col - 1].value
                 for prop, col in key_info.iteritems()
@@ -108,7 +116,7 @@ class MUFG_Gsheet(object):
             d["latlng"] = latlng
             p = Portal(**d)
             k = Key(portal=p)
-            portal_list.append((row, k))
+            portal_list.append((vals[0].row, k))
         return portal_list
 
     def get_init_transaction_from_column(self, col_number, target="INV"):
