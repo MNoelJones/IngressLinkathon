@@ -1,7 +1,9 @@
 import gspread
+import re
 from oauth2client.service_account import ServiceAccountCredentials
 from collections import namedtuple
 from Inventory import Portal, Key
+from kids.cache import cache
 
 
 class MUFG_Gsheet(object):
@@ -54,20 +56,25 @@ class MUFG_Gsheet(object):
             self.data_rows_start_end[1]
         ]
 
+    @cache
     def get_colnum_data(self, col_number):
         return MUFG_Gsheet.MufgTuple._make(self._data_values(col_number))
 
+    @cache
     def get_colname_data(self, col_name):
         return MUFG_Gsheet.MufgTuple._make(self._data_values(self.mufg.get_int_addr(col_name + "1")[1]))
 
+    @cache
     def get_mufg_guids(self):
         return [(x.col, x.value) for x in self.mufg.range("{}2:{}2".format(*self.mufg_cols_start_end))]
 
+    @cache
     def get_keycap_guids(self):
         rng = self.mufg.range("{}2:{}2".format(*self.keycap_cols_start_end))
         guids = [(x.col, x.value.split(" ")[1]) for x in rng]
         return guids
 
+    @cache
     def get_capsule_guids(self):
         rng = self.mufg.range("{}2:{}2".format(*self.cap_cols_start_end))
         return [(x.col, x.value) for x in rng]
@@ -119,7 +126,8 @@ class MUFG_Gsheet(object):
             portal_list.append((vals[0].row, k))
         return portal_list
 
-    def get_init_transaction_from_column(self, col_number, target="INV"):
+    def get_init_transaction_from_column(self, target="INV"):
+        col_number = self.get_col_for_target("mufg", target)
         col_vals = self.get_colnum_data(col_number)
         tx = (
             "CR {} ".format(target) +
@@ -127,10 +135,41 @@ class MUFG_Gsheet(object):
                 "{} {}".format(count, name)
                 for name, count in col_vals._asdict().iteritems()
                 if count not in ('', '0', None) and name not in "Keys"
-            ] + ["" if col_vals.Keys == "0" else "{} KEY".format(col_vals.Keys)])
+            ] + self.get_key_transaction(target))
         )
         return tx
 
+    @cache
+    def get_col_for_target(self, sheet="mufg", target="INV"):
+        sheet_target_locations = {
+            "mufg": "F2:AW2", 
+            "keys": "K4:BB4"
+        }
+        targets = getattr(self, sheet).range(sheet_target_locations[sheet])
+        c = re.compile(target, re.IGNORECASE)
+        try:
+            return [t for t in targets if c.search(t.value)][0].col
+        except IndexError as err:
+            raise Exception("Cannot find column for target {} in {} ({})".format(target, sheet, err))
+
+    def get_keys(self, target):
+        key_col = self.get_col_for_target("keys", target)
+
+        rng_addr = "{}:{}".format(
+            self.keys.get_addr_int(self.key_rows_start_end[0], key_col),
+            self.keys.get_addr_int(self.key_rows_start_end[1], key_col)
+        )
+
+        rng = self.keys.range(rng_addr)
+        values = []
+        for p, x in zip(self.portal_list, rng):
+            if bool(x.value) and int(x.value) is not 0:
+                values.extend([Key(portal=p[1])] * int(x.value))
+        return values
+
+    def get_key_transaction(self, target):
+        values = self.get_keys(target)
+        return [str(val) for val in values]
 
 # "CR INV " + " ".join(["{} {}".format(x[1], x[0]) for x in mufg_sht.get_zipped_col('F')[4:] if x[1] not in ('', '0', None)])
 

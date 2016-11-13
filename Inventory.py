@@ -722,7 +722,7 @@ class Inventory(object):
     def apply_transaction(self, transaction):
         tx_re = re.compile(
             r'(?P<crdr>CR|DR)\s+(?P<target>\w+)\s+'
-            r'(?P<transaction>(?:\d+\s+\w+\d?\s*)+)'
+            r'(?P<transaction>(?:(\d+\s+\w+\d?|KEY\s*\[.*?\])\s*)+)'
         )
         operations = {
             "CR": "add",
@@ -741,8 +741,9 @@ class Inventory(object):
     def _apply_individual_transaction(self, operation, target, transaction):
         tx_re = re.compile(
             (
-                r'(?P<amount>\d+)\s+'
+                r'(?:(?P<amount>\d+)\s+)?'
                 r'(?:'
+                r'(?P<key>KEY\s*\[(.*?)\])|'
                 r'(?P<lshortcode>(?:{}))(?P<level>\d)|'
                 r'(?P<rarity>{})?(?P<nlshortcode>(?:{}))'
                 r')\s*'
@@ -754,20 +755,31 @@ class Inventory(object):
         )
 
         for match in tx_re.finditer(transaction):
-            for _ in range(0, int(match.group("amount"))):
-                if match.group("nlshortcode"):
-                    shortcode = match.group("nlshortcode")
-                    klass = self._shortcodes["nolevel_items"][shortcode]
-                    item = klass()
-
-                if match.group("lshortcode"):
-                    shortcode = match.group("lshortcode")
-                    klass = self._shortcodes["level_items"][shortcode]
-                    item = klass()
-                    item.level = int(match.group("level"))
-
-                try:
-                    item.rarity = self._raritycodes[match.group("rarity")]()
-                except KeyError:
-                    pass
+            item = self._get_transaction_item(match)
+            if "amount" in match.groupdict() and match.group("amount"):
+                for _ in range(0, int(match.group("amount"))):
+                    getattr(target, operation)(item)
+            else:
                 getattr(target, operation)(item)
+
+
+    def _get_transaction_item(self, match):
+        if match.group("key"):
+            item = Key()
+
+        elif match.group("nlshortcode"):
+            shortcode = match.group("nlshortcode")
+            klass = self._shortcodes["nolevel_items"][shortcode]
+            item = klass()
+
+        elif match.group("lshortcode"):
+            shortcode = match.group("lshortcode")
+            klass = self._shortcodes["level_items"][shortcode]
+            item = klass()
+            item.level = int(match.group("level"))
+
+        try:
+            item.rarity = self._raritycodes[match.group("rarity")]()
+        except KeyError:
+            pass
+        return item

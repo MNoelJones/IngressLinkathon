@@ -64,7 +64,7 @@ class TestPopulatedInventory(TestCase):
             capsule.add(Inventory.Resonator())
         self.inventory.add(capsule)
 
-        self.assertEqual(self.inventory.itemcount(), 21)
+        self.assertEqual(self.inventory.itemcount(), 20)
         self.assertEqual(self.inventory.invcount(), 21)
 
     def test_keylocker_addition(self):
@@ -77,7 +77,7 @@ class TestPopulatedInventory(TestCase):
             locker.add(Inventory.Key())
         self.inventory.add(locker)
 
-        self.assertEqual(self.inventory.itemcount(), 21)
+        self.assertEqual(self.inventory.itemcount(), 20)
         self.assertEqual(self.inventory.invcount(), 16)
 
 
@@ -135,4 +135,47 @@ class TestProcessTransaction(TestCase):
         self.assertEqual(len(self.inventory.capsules["AABBAABB"].bursters), 0)
 
     def test_stored_transaction(self):
-        self.fail()
+        inventory = self.inventory
+        capsule = Inventory.Capsule()
+        capsule.guid = "9FD860A1"
+        inventory.add(capsule)
+        inventory.apply_transaction("CR INV 5 X8 10 R1")
+        inventory.apply_transaction("CR 9FD860A1 10 X8")
+        inventory.stage_transaction("DR INV 5 X8")
+        inventory.stage_transaction("CR 9FD860A1 5 X8")
+        self.assertEqual(10, len(inventory.resonators))
+        self.assertEqual(5, len(inventory.bursters))
+        self.assertEqual(10, len(inventory.capsules["9FD860A1"].bursters))
+
+        inventory.apply_staged_transactions()
+        self.assertEqual(10, len(inventory.resonators))
+        self.assertEqual(0, len(inventory.bursters))
+        self.assertEqual(15, len(inventory.capsules["9FD860A1"].bursters))
+
+    def test_common_shield_transaction(self):
+        inventory = self.inventory
+        inventory.apply_transaction("CR INV 1 CS")
+        self.assertEqual(1, len(inventory.shields))
+        self.assertIsInstance(inventory.shields[0].rarity, Inventory.Common)
+
+    def test_two_bursters(self):
+        b1 = Inventory.Burster()
+        b1.level = 8
+        b2 = Inventory.Burster()
+        b2.level = 8
+        self.assertTrue(b1 == b2)
+
+        b2.level = 7
+        self.assertFalse(b1 == b2)
+
+    def test_two_shields(self):
+        s1 = Inventory.Shield()
+        s1.rarity = Inventory.Rare()
+        s2 = Inventory.Shield()
+        # with when.they_are_the_same_rarity:
+        s2.rarity = Inventory.Rare()
+        self.assertTrue(s1 == s2)
+
+        # with when.they_are_different_rarity:
+        s2.rarity = Inventory.VeryRare()
+        self.assertFalse(s1 == s2)
