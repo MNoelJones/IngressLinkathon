@@ -88,6 +88,20 @@ def rarityproperty(cls):
 
     cls.has_rarity = classmethod(lambda cls: True)
 
+    def patcher(the_class=cls):
+        old_eq = the_class.__eq__
+
+        def new_eq(self, other):
+            state = old_eq(self, other)
+            try:
+                state = state and (self.rarity == other.rarity)
+            except:
+                pass
+            return state
+
+        the_class.__eq__ = new_eq
+
+    patcher(cls)
     return decorator(cls)
 
 
