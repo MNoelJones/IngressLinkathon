@@ -1,6 +1,7 @@
 # worldsim_parser.py
-from pyparsing import *
-from pyparsing import oneOf, quotedString
+from pyparsing import ParserElement, oneOf, hexnums, QuotedString
+from pyparsing import Optional, Suppress, Keyword, Word, Literal
+from pyparsing import Or, OneOrMore, Forward, Group
 from pyparsing import pyparsing_common as ppc
 identifier = ppc.identifier
 integer = ppc.integer
@@ -190,6 +191,7 @@ class WorldsimParser(ParserElement):
                 portal_id ^
                 field_ref ^
                 link_request ^
+                destroy_link_request ^
                 locate_command ^
                 guid_command ^
                 move_command

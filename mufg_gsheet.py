@@ -24,6 +24,7 @@ class MUFG_Gsheet(object):
         self.mufg_cols_start_end = ("L", "X")
         self.cap_cols_start_end = ("Z", "AV")
         self.data_rows_start_end = (5, 56)
+        self.extra_keys_row = 61
         self.key_rows_start_end = [None, None]
         self._portal_list = None
         self.init()
@@ -131,18 +132,28 @@ class MUFG_Gsheet(object):
         col_vals = self.get_colnum_data(col_number)
         tx = (
             "CR {} ".format(target) +
-            " ".join([
-                "{} {}".format(count, name)
-                for name, count in col_vals._asdict().iteritems()
-                if count not in ('', '0', None) and name not in "Keys"
-            ] + self.get_key_transaction(target))
+            " ".join(
+                [
+                    "{} {}".format(count, name)
+                    for name, count in col_vals._asdict().iteritems()
+                    if count not in ('', '0', None) and name not in "Keys"
+                ] +
+                self.get_key_transaction(target) +
+                self.get_extra_key_transaction(target)["CR"]
+            )
         )
+        if "DR" in self.get_extra_key_transaction(target):
+            tx += (
+                " " +
+                "DR {}".format(target) +
+                self.get_extra_key_transaction(target)["DR"]
+            )
         return tx
 
     @cache
     def get_col_for_target(self, sheet="mufg", target="INV"):
         sheet_target_locations = {
-            "mufg": "F2:AW2", 
+            "mufg": "F2:AW2",
             "keys": "K4:BB4"
         }
         targets = getattr(self, sheet).range(sheet_target_locations[sheet])
@@ -150,7 +161,10 @@ class MUFG_Gsheet(object):
         try:
             return [t for t in targets if c.search(t.value)][0].col
         except IndexError as err:
-            raise Exception("Cannot find column for target {} in {} ({})".format(target, sheet, err))
+            raise Exception(
+                "Cannot find column for target "
+                "{} in {} ({})".format(target, sheet, err)
+            )
 
     def get_keys(self, target):
         key_col = self.get_col_for_target("keys", target)
@@ -170,6 +184,26 @@ class MUFG_Gsheet(object):
     def get_key_transaction(self, target):
         values = self.get_keys(target)
         return [str(val) for val in values]
+
+    def get_extra_key_transaction(self, target):
+        extra_keys = self.translate_string_to_value(
+            self.mufg.cell(
+                self.extra_keys_row,
+                self.get_col_for_target(target=target)
+            ).value
+        )
+        ret = {"CR": [], "DR": []}
+        if extra_keys > 0:
+            ret["CR"] = ["{} KEY".format(extra_keys)]
+        elif extra_keys < 0:
+            ret["DR"] = ["{} KEY".format(-extra_keys)]
+        return ret
+
+    def translate_string_to_value(self, instr):
+        if instr == "":
+            return None
+        return int(instr)
+
 
 # "CR INV " + " ".join(["{} {}".format(x[1], x[0]) for x in mufg_sht.get_zipped_col('F')[4:] if x[1] not in ('', '0', None)])
 

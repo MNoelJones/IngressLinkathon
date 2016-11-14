@@ -1,5 +1,4 @@
 """test_mufg_gsheet.py."""
-import re
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
 from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
@@ -9,7 +8,8 @@ class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
         self.mufg_sht = MUFG_Gsheet(
-            creds_file='IngressLinkathon-5dbf4501bc77.json'
+            # creds_file='IngressLinkathon-5dbf4501bc77.json'
+            creds_file='../IngressLinkathon-a66875a48d53.json'
         )
 
     def test_populate_inventory(self):
@@ -28,11 +28,9 @@ class TestMUFGGsheet(TestCase):
         mufgs = mufg_sht.get_mufg_guids()
         for colnum, guid in mufgs:
             tx = mufg_sht.get_init_transaction_from_column(target=guid)
-            print "Adding MUFG with guid {}, contents: {}".format(guid, tx)
             inv.add(MUFG(guid))
             inv.apply_transaction(tx)
         for colnum, guid in mufgs:
-            print guid,
             self.assertEqual(
                 inv.mufgs[guid].itemcount(),
                 int(mufg_sht.mufg.cell(4, colnum).value)
@@ -62,7 +60,6 @@ class TestMUFGGsheet(TestCase):
             self.inv.add(KeyCapsule(guid))
             self.inv.apply_transaction(tx)
         for colnum, guid in caps:
-            print guid,
             self.assertEqual(
                 self.inv.keycaps[guid].itemcount(),
                 int(self.mufg_sht.mufg.cell(4, colnum).value)
@@ -79,16 +76,14 @@ class TestMUFGGsheet(TestCase):
             self.assertEqual(k.title, vals[0].value)
             self.assertEqual(k.guid, vals[4].value)
 
-    def translate_string_to_value(self, instr):
-        if instr == "":
-            return None
-        return int(instr)
-
     def test_populate_keylocker_keys(self):
         caps = self.mufg_sht.get_keycap_guids()
         for colnum, guid in caps:
             values = self.mufg_sht.get_keys(guid)
             keycount = len(values)
-            cell = self.mufg_sht.keys.cell(3, self.mufg_sht.get_col_for_target(sheet="keys", target=guid))
-            sheet_count = self.translate_string_to_value(cell.value)
+            cell = self.mufg_sht.keys.cell(
+                3,
+                self.mufg_sht.get_col_for_target(sheet="keys", target=guid)
+            )
+            sheet_count = self.mufg_sht.translate_string_to_value(cell.value)
             self.assertEqual(sheet_count, keycount)
