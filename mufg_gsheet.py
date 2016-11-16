@@ -199,9 +199,9 @@ class MUFG_Gsheet(object):
             ret["DR"] = ["{} KEY".format(-extra_keys)]
         return ret
 
-    def translate_string_to_value(self, instr):
+    def translate_string_to_value(self, instr, none_is_zero=False):
         if instr == "":
-            return None
+            return 0 if none_is_zero else None
         return int(instr)
 
 
