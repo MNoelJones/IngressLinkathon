@@ -87,3 +87,6 @@ class TestMUFGGsheet(TestCase):
             )
             sheet_count = self.mufg_sht.translate_string_to_value(cell.value)
             self.assertEqual(sheet_count, keycount)
+
+    def test_find_capsules_with_key_changes(self):
+        pass

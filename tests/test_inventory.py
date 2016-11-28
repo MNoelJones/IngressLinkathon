@@ -179,3 +179,4 @@ class TestProcessTransaction(TestCase):
         # with when.they_are_different_rarity:
         s2.rarity = Inventory.VeryRare()
         self.assertFalse(s1 == s2)
+
