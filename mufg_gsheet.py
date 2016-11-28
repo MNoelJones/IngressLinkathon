@@ -178,7 +178,7 @@ class MUFG_Gsheet(object):
         values = []
         for p, x in zip(self.portal_list, rng):
             if bool(x.value) and int(x.value) is not 0:
-                values.extend([Key(portal=p[1])] * int(x.value))
+                values.extend([Key(portal=p[1]) for _ in range(int(x.value))])
         return values
 
     def get_key_transaction(self, target):
