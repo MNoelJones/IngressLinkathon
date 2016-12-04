@@ -12,7 +12,7 @@ numeric = ppc.number
 <pid> ::= <numeric>
 <portal-id> ::= ID <portalname> '=' <pid>
 
-<link-request> ::= LINK <portal> [TO] <portal> [AS <id>]
+<link-request> ::= LINK <portal> [TO] <portal> [AS <id>] [FORWARD]
 
 <field-request> ::= FIELD <portal> <portal> <portal> [AS <id>]
 
@@ -94,7 +94,8 @@ class WorldsimParser(ParserElement):
         field_request = (
             Suppress(Keyword('FIELD')) +
             portal + portal + portal +
-            as_id
+            as_id +
+            Optional(Keyword('FORWARD'))
         ).setParseAction(self.field_request_action)
         capture_request = (
             Suppress(Keyword('CAPTURE')) +

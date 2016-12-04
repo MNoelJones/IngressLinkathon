@@ -146,7 +146,7 @@ class MUFG_Gsheet(object):
             tx += (
                 " " +
                 "DR {}".format(target) +
-                self.get_extra_key_transaction(target)["DR"]
+                " ".join(self.get_extra_key_transaction(target)["DR"])
             )
         return tx
 
@@ -190,7 +190,8 @@ class MUFG_Gsheet(object):
             self.mufg.cell(
                 self.extra_keys_row,
                 self.get_col_for_target(target=target)
-            ).value
+            ).value,
+            none_is_zero=True
         )
         ret = {"CR": [], "DR": []}
         if extra_keys > 0:
@@ -199,9 +200,9 @@ class MUFG_Gsheet(object):
             ret["DR"] = ["{} KEY".format(-extra_keys)]
         return ret
 
-    def translate_string_to_value(self, instr):
+    def translate_string_to_value(self, instr, none_is_zero=False):
         if instr == "":
-            return None
+            return None if none_is_zero is False else 0
         return int(instr)
 
 

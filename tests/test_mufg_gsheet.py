@@ -8,8 +8,8 @@ class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
         self.mufg_sht = MUFG_Gsheet(
-            # creds_file='IngressLinkathon-5dbf4501bc77.json'
-            creds_file='../IngressLinkathon-a66875a48d53.json'
+            creds_file='IngressLinkathon-5dbf4501bc77.json'
+            # creds_file='../IngressLinkathon-a66875a48d53.json'
         )
 
     def test_populate_inventory(self):
