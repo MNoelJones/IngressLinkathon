@@ -202,7 +202,7 @@ class MUFG_Gsheet(object):
 
     def translate_string_to_value(self, instr, none_is_zero=False):
         if instr == "":
-            return None if none_is_zero is False else 0
+            return 0 if none_is_zero else None
         return int(instr)
 
 
