@@ -72,8 +72,9 @@ class Portal(object):
 
 
 class Field(object):
-    def __init__(self, *portals):
+    def __init__(self, portals=None, field_id=None):
         self._portals = portals
+        self._field_id = field_id
 
     @property
     def portals(self):

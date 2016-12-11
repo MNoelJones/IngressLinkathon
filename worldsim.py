@@ -65,10 +65,18 @@ class Command(object):
 
 
 class LinkCommand(Command):
-    def __init__(self, portal1=None, portal2=None, **kwargs):
+    def __init__(self, portal1=None, portal2=None, link_id=None, **kwargs):
         super(LinkCommand, self).__init__(**kwargs)
         self._portal1 = portal1
         self._portal2 = portal2
+        self._link_id = link_id
+
+    def __str__(self):
+        return "LINK {} {}{}".format(
+            self._portal1.id,
+            self._portal2.id,
+            "" if self._link_id is None else "AS {}".format(self._link_id)
+        )
 
     def __call__(self):
         # print "Creating Link from {} to {}".format(
@@ -122,17 +130,18 @@ class Player(object):
         command.world = self.world
         command.player = self
 
-    def create_link(self, portal_from, portal_to):
-        world.create_link(portal_from, portal_to)
+    def create_link(self, portal_from, portal_to, link_id=None):
+        world.create_link(portal_from, portal_to, link_id=link_id)
 
     def is_at(self, portal):
         return self.location == portal.location
 
 
 class Portal(object):
-    def __init__(self, name=None, guid=None, location=None):
+    def __init__(self, name=None, id=None, location=None):
         self.name = name
-        self.guid = guid
+        self.id = id  # ID by which the portal is referred to in worldsim
+        self.guid = None  # Ingress GUID
         self.location = location
         self.outbound_links = []
         self.inbound_links = []
@@ -150,18 +159,34 @@ class Portal(object):
 
 
 class Link(object):
-    def __init__(self, portal_from=None, portal_to=None):
+    def __init__(self, portal_from=None, portal_to=None, link_id=None):
         self._from = portal_from
         self._to = portal_to
+        self._link_id = link_id
+
+    @property
+    def link_id(self):
+        return self._link_id
 
 
 class Field(object):
-    def __init__(self, portals=[]):
+    def __init__(self, portals=None, field_id=None):
         self._portals = portals
+        self._field_id = field_id
 
     @property
     def portals(self):
         return self._portals
+
+    @property
+    def field_id(self):
+        return self._field_id
+
+    def portal_inside_field(self, portal):
+        (p1, p2, p3) = [p.location for p in self.portals]
+        p = portal.location
+        return point_in_triangle(p, p1, p2, p3)
+
 
 
 class World(object):
@@ -187,13 +212,25 @@ class World(object):
     def fields(self):
         return self._fields
 
-    def add_portal(self, name=None, guid=None, location=None):
+    @property
+    def links(self):
+        return self._links
+
+    def add_portal(self, name=None, id=None, location=None):
         portal = Portal(
             name=name,
-            guid=guid,
+            id=id,
             location=location
         )
         self._portals.append(portal)
+        return portal
+
+    def find_portal(self, id):
+        portal = None
+        try:
+            portal = [p for p in self.portal if p.id == id][0]
+        except IndexError:
+            print "No portal with ID {}".format(toks[0])
         return portal
 
     def field_exists(self, portal1, portal2, portal3):
@@ -222,8 +259,8 @@ class World(object):
             portal3.location
         )
 
-    def create_field(self, portal1, portal2, portal3):
-        self.fields.append(Field([portal1, portal2, portal3]))
+    def create_field(self, portal1, portal2, portal3, field_id=None):
+        self.fields.append(Field(portals=[portal1, portal2, portal3], field_id=field_id))
 
     def portal_within_field(self, portal):
         """ Test if a portal is within any existing fields. """
@@ -235,7 +272,7 @@ class World(object):
                 return True
         return False
 
-    def create_link(self, portal_one, portal_two):
+    def create_link(self, portal_one, portal_two, link_id=None):
         assert portal_one in self._portals, (
             "Unknown portal, {}".format(portal_one)
         )
