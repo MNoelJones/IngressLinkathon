@@ -1,0 +1,51 @@
+ID "If Aught of Oaten" AS 2
+ID "The Bounty Inn Pub" AS 3
+ID "I Saw The Hare" AS 4
+ID "Diana Stanley Memorial Plaque" AS 5
+ID "War Memorial Playground" AS 6
+ID "Torch" AS 7
+ID "Civic Centre War Memorial" AS 8
+ID "War Memorial Park" AS 9
+ID "Memorial Park Aviary" AS 10
+ID "Shelter Dedication Plaque" AS 11
+ID "The Golden Tree Engraving" AS 12
+ID "Memorial Band Stand" AS 13
+ID "Kath And Gordon Ball Memorial" AS 14
+ID "Winnie White Memorial Bench" AS 15
+ID "Tree Planting Ceremony Plaque" AS 16
+ID "Ivy & George White Plaque" AS 17
+
+LOCATE 2 AT 51.258623N, -1.081081E
+LOCATE 3 AT 51.260184N, -1.088666E
+LOCATE 4 AT 51.260287N, -1.083540E
+LOCATE 5 AT 51.259231N, -1.084654E
+LOCATE 6 AT 51.258658N, -1.081617E
+LOCATE 7 AT 51.261578N, -1.083193E
+LOCATE 8 AT 51.262180N, -1.082827E
+LOCATE 9 AT 51.261766N, -1.082850E
+LOCATE 10 AT 51.261324N, -1.083513E
+LOCATE 11 AT 51.261720N, -1.082287E
+LOCATE 12 AT 51.259443N, -1.083362E
+LOCATE 13 AT 51.260750N, -1.083664E
+LOCATE 14 AT 51.260892N, -1.081706E
+LOCATE 15 AT 51.259620N, -1.081563E
+LOCATE 16 AT 51.260552N, -1.081721E
+LOCATE 17 AT 51.260315N, -1.081542E
+
+FIELD "Civic Centre War Memorial" "War Memorial Playground" "War Memorial Park" AS 101
+FIELD "Civic Centre War Memorial" "War Memorial Playground" "Torch" AS 102
+FIELD "Civic Centre War Memorial" "War Memorial Playground" "Memorial Park Aviary" AS 103
+
+FIELD "Diana Stanley Memorial Plaque" "War Memorial Playground" "The Golden Tree Engraving" AS 201
+FIELD "Diana Stanley Memorial Plaque" "War Memorial Playground" "I Saw The Hare" AS 202
+FIELD "Diana Stanley Memorial Plaque" "War Memorial Playground" "Memorial Band Stand" AS 203
+FIELD "Diana Stanley Memorial Plaque" "War Memorial Playground" "Memorial Park Aviary" AS 204
+
+FIELD "Civic Centre War Memorial" "War Memorial Playground" "Tree Planting Ceremony" AS 301
+FIELD "Civic Centre War Memorial" "Tree Planting Ceremony" "Kath And Gordon Ball" AS 302
+FIELD "Civic Centre War Memorial" "Kath And Gordon Ball" "Shelter Dedication" AS 303
+
+FIELD "War Memorial Playground" "If Aught of Oaten" "Winnie White Memorial Bench" AS 401
+FIELD "War Memorial Playground" "If Aught of Oaten" "Ivy & George White Plaque" AS 402
+
+FIELD "Ivy & George White Plaque" "Tree Planting Ceremony" "Kath And Gordon Ball" AS 501

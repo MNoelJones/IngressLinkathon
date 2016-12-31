@@ -1,5 +1,5 @@
 # worldsim_populator.py
-from worldsim import World
+from worldsim import World, LinkCommand
 from worldsim_parser import WorldsimParser
 
 
@@ -42,7 +42,9 @@ class AWorldsimParser(WorldsimParser):
     def link_request_action(self, toks):
         print "Aworldsim_parser: {}".format(toks)
         (p1, p2, lid) = toks
-        self.world.create_link(p1, p2, link_id=lid)
+        cmd = LinkCommand(portal1=p1, portal2=p2, link_id=lid, world=self.world)
+        self.world.player[0].commands.append(cmd)
+
 
 class WorldsimPopulator(object):
     def __init__(self, world=None):

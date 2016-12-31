@@ -1,5 +1,3 @@
-import functools
-
 
 def area_of_triangle(point1, point2, point3):
     (x1, y1, x2, y2, x3, y3) = (point1 + point2 + point3)
@@ -22,13 +20,13 @@ def bary(point1, point2, point3, point4):
         ) / (
             (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
         )
-    except BaseException as err:
+    except BaseException:
         raise ValueError
     c = 1 - a - b
     return (a, b, c)
 
 
-def pointintri(p, p1, p2, p3):
+def point_in_triangle(p, p1, p2, p3):
     try:
         (a, b, c) = bary(p1, p2, p3, p)
     except BaseException as err:
@@ -131,7 +129,7 @@ class Player(object):
         command.player = self
 
     def create_link(self, portal_from, portal_to, link_id=None):
-        world.create_link(portal_from, portal_to, link_id=link_id)
+        self._world.create_link(portal_from, portal_to, link_id=link_id)
 
     def is_at(self, portal):
         return self.location == portal.location
@@ -186,7 +184,6 @@ class Field(object):
         (p1, p2, p3) = [p.location for p in self.portals]
         p = portal.location
         return point_in_triangle(p, p1, p2, p3)
-
 
 
 class World(object):
@@ -265,7 +262,7 @@ class World(object):
     def portal_within_field(self, portal):
         """ Test if a portal is within any existing fields. """
         for field in self.fields:
-            if pointintri(
+            if point_in_triangle(
                 portal.location,
                 *[x.location for x in field.portals]
             ):
@@ -298,7 +295,7 @@ class World(object):
                 while idx2 < len(pfp):
                     test_portal = pfp[idx2]
                     if test_portal is not item:
-                        if pointintri(
+                        if point_in_triangle(
                             test_portal.location,
                             item.location,
                             portal_one.location,
