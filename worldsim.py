@@ -62,12 +62,43 @@ class Command(object):
         self._player = val
 
 
+class FieldCommand(Command):
+    def __init__(self, portals=None, field_id=None, **kwargs):
+        super(FieldCommand, self).__init__(**kwargs)
+        self._portals = portals
+        self._field_id = field_id
+
+    @property
+    def field_id(self):
+        return self._field_id
+
+
 class LinkCommand(Command):
     def __init__(self, portal1=None, portal2=None, link_id=None, **kwargs):
         super(LinkCommand, self).__init__(**kwargs)
         self._portal1 = portal1
         self._portal2 = portal2
         self._link_id = link_id
+
+    @property
+    def link_id(self):
+        return self._link_id
+
+    @property
+    def p1(self):
+        return self._portal1
+
+    @property
+    def p2(self):
+        return self._portal2
+
+    @property
+    def portal1(self):
+        return self._portal1
+
+    @property
+    def portal2(self):
+        return self._portal2
 
     def __str__(self):
         return "LINK {} {}{}".format(
@@ -136,10 +167,10 @@ class Player(object):
 
 
 class Portal(object):
-    def __init__(self, name=None, id=None, location=None):
+    def __init__(self, name=None, id=None, location=None, guid=None):
         self.name = name
         self.id = id  # ID by which the portal is referred to in worldsim
-        self.guid = None  # Ingress GUID
+        self.guid = guid  # Ingress GUID
         self.location = location
         self.outbound_links = []
         self.inbound_links = []
@@ -213,10 +244,11 @@ class World(object):
     def links(self):
         return self._links
 
-    def add_portal(self, name=None, id=None, location=None):
+    def add_portal(self, name=None, id=None, location=None, guid=None):
         portal = Portal(
             name=name,
             id=id,
+            guid=guid,
             location=location
         )
         self._portals.append(portal)
@@ -227,7 +259,7 @@ class World(object):
         try:
             portal = [p for p in self.portal if p.id == id][0]
         except IndexError:
-            print "No portal with ID {}".format(toks[0])
+            print "No portal with ID {}".format(id)
         return portal
 
     def field_exists(self, portal1, portal2, portal3):

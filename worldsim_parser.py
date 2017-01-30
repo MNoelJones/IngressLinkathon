@@ -89,13 +89,13 @@ class WorldsimParser(ParserElement):
             portal +
             Optional(Suppress(Literal('TO'))) +
             portal +
-            as_id
+            as_id +
+            Optional(Keyword('FORWARD'))
         ).setParseAction(self.link_request_action)
         field_request = (
             Suppress(Keyword('FIELD')) +
             portal + portal + portal +
-            as_id +
-            Optional(Keyword('FORWARD'))
+            as_id
         ).setParseAction(self.field_request_action)
         capture_request = (
             Suppress(Keyword('CAPTURE')) +

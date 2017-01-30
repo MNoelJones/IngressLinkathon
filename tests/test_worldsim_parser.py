@@ -2,6 +2,7 @@
 from unittest import TestCase  # , skip
 from worldsim_parser import WorldsimParser
 from worldsim_populator import WorldsimPopulator
+from worldsim import LinkCommand, World, Player, FieldCommand
 
 
 class TestWorldsimParser(TestCase):
@@ -40,7 +41,10 @@ class TestWorldsimParser(TestCase):
 
 class TestWorldsimPopulator(TestCase):
     def setUp(self):
-        self.wspopulator = WorldsimPopulator()
+        player = Player()
+        world = World()
+        world.add_player(player)
+        self.wspopulator = WorldsimPopulator(world=world)
 
     def test_add_portal_to_world(self):
         """ After adding a portal to the world, it should be accessible """
@@ -112,8 +116,10 @@ class TestWorldsimPopulator(TestCase):
             FIELD 2 6 9 as 307
         """
         self.wspopulator.parse(instring)
+        commands = self.wspopulator.world.player[0].commands
+        fieldcommands = [command for command in commands if isinstance(command, FieldCommand)]
         self.assertItemsEqual(
-            [f.field_id for f in self.wspopulator.world.fields],
+            [f.field_id for f in fieldcommands],
             ["301", "302", "303", "304", "305", "306", "307"]
         )
 
@@ -127,7 +133,9 @@ class TestWorldsimPopulator(TestCase):
             LINK 6 5 as 108 FORWARD
         """
         self.wspopulator.parse(instring)
+        commands = self.wspopulator.world.player[0].commands
+        linkcommands = [command for command in commands if isinstance(command, LinkCommand)]
         self.assertItemsEqual(
-            [l.link_id for l in self.wspopulator.world.links],
+            [l.link_id for l in linkcommands],
             ["107", "108"]
         )

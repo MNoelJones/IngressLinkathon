@@ -1,5 +1,5 @@
 # worldsim_populator.py
-from worldsim import World, LinkCommand
+from worldsim import World, LinkCommand, FieldCommand
 from worldsim_parser import WorldsimParser
 
 
@@ -37,11 +37,13 @@ class AWorldsimParser(WorldsimParser):
     def field_request_action(self, toks):
         print "Aworldsim_parser: {}".format(toks)
         (p1, p2, p3, fid) = toks
-        self.world.create_field(p1, p2, p3, field_id=fid)
+        cmd = FieldCommand(portals=[p1, p2, p3], field_id=fid, world=self.world)
+        self.world.player[0].commands.append(cmd)
+        # self.world.create_field(p1, p2, p3, field_id=fid)
 
     def link_request_action(self, toks):
-        print "Aworldsim_parser: {}".format(toks)
-        (p1, p2, lid) = toks
+        print "Aworldsim_parser (LINK): {}".format(toks)
+        (p1, p2, lid, fwd) = toks
         cmd = LinkCommand(portal1=p1, portal2=p2, link_id=lid, world=self.world)
         self.world.player[0].commands.append(cmd)
 
