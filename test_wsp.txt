@@ -1,0 +1,59 @@
+ID "Wote Street Monument" as 1
+ID "Entrance to Black Dam and Crabtree" as 2
+ID "Author Atwood" as 3
+ID "Entrance to War Memorial Park (flat)" as 4
+ID "St.Mary's" as 5
+ID "Canal Heritage Footpath" as 6
+ID "Fossil Post" as 7
+ID "The Boat House" as 8
+ID "Eastrop Park (large)" as 9
+
+LINK 1 2 as 101
+LINK 3 2 as 102
+LINK 1 4 as 103
+LINK 1 5 as 104
+LINK 1 6 as 105
+LINK 3 6 as 106
+LINK 5 4 as 107 FORWARD
+LINK 6 5 as 108 FORWARD
+
+DESTROY 3 as 209
+DEPLOY 3 as 210
+
+LINK 7 2 as 111
+LINK 8 2 as 112
+LINK 9 2 as 113
+LINK 6 2 as 114
+LINK 3 1 as 115 FORWARD
+LINK 5 2 as 116
+
+DEPLOY 6 as 217
+LINK 4 2 as 118
+DEPLOY 4 as 219
+DEPLOY 5 as 220
+
+LINK 7 6 as 119
+LINK 8 6 as 120
+LINK 9 6 as 121
+LINK 8 7 as 122 FORWARD
+LINK 9 8 as 123 FORWARD
+
+
+# ORDER 
+SEQ 209 110
+SEQ 210 102
+SEQ 210 106
+SEQ 210 104
+SEQ 210 105
+SEQ 210 114
+SEQ 114 106
+SEQ 106 115
+SEQ 116 114
+SEQ 116 107
+SEQ 104 107
+SEQ 117 114
+SEQ 117 106
+SEQ 117 105
+SEQ 103 104
+SEQ 118 104
+ 

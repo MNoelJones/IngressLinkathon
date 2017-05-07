@@ -1,6 +1,6 @@
 # worldsim_parser.py
 from pyparsing import ParserElement, oneOf, hexnums, QuotedString
-from pyparsing import Optional, Suppress, Keyword, Word, Literal
+from pyparsing import Optional, Suppress, Keyword, Word, Literal, CaselessKeyword
 from pyparsing import Or, OneOrMore, Forward, Group
 from pyparsing import pyparsing_common as ppc
 identifier = ppc.identifier
@@ -12,7 +12,7 @@ numeric = ppc.number
 <pid> ::= <numeric>
 <portal-id> ::= ID <portalname> '=' <pid>
 
-<link-request> ::= LINK <portal> [TO] <portal> [AS <id>]
+<link-request> ::= LINK <portal> [TO] <portal> [AS <id>] [FORWARD]
 
 <field-request> ::= FIELD <portal> <portal> <portal> [AS <id>]
 
@@ -63,12 +63,12 @@ class WorldsimParser(ParserElement):
         pid = Word(hexnums)
         portalname = (QuotedString('"') ^ QuotedString("'"))
         portalguid = Word(hexnums + '.' + hexnums, exact=35)
-        as_id = Optional(Suppress(Keyword('AS')) + pid)
+        as_id = Optional(Suppress(CaselessKeyword('AS')) + pid)
         link_id = pid
         portal_id = (
             Suppress(Keyword('ID')) +
             portalname +
-            Suppress(Literal('=') | Keyword('AS')) +
+            Suppress(Literal('=') | CaselessKeyword('AS')) +
             pid
         ).setParseAction(self.id_command_action)
         guid_command = (
@@ -77,11 +77,11 @@ class WorldsimParser(ParserElement):
             portalguid
         ).setParseAction(self.guid_command_action)
         # <lat> ::= ['-'] <intorfloat | <intorfloat>  ['N' | 'S']
-        lat = real + Or(Literal('N'), Literal('S'))
+        lat = real + (Literal('N') ^ Literal('S'))
         # <lng> ::= ['-'] <intorfloat> | <intorfloat> ['E' | 'W']
-        lng = real + Or(Literal('E'), Literal('W'))
+        lng = real + (Literal('E') ^ Literal('W'))
         # <latlng> ::= <lat>[,] <lng>
-        latlng = lat + Optional(Literal(',')) + lng
+        latlng = lat + Suppress(Optional(Literal(','))) + lng
         # <portal> ::= <portalname> | <portalguid> | <latlng>
         portal = portalname | portalguid | latlng | pid
         link_request = (
@@ -89,7 +89,8 @@ class WorldsimParser(ParserElement):
             portal +
             Optional(Suppress(Literal('TO'))) +
             portal +
-            as_id
+            as_id +
+            Optional(Keyword('FORWARD'))
         ).setParseAction(self.link_request_action)
         field_request = (
             Suppress(Keyword('FIELD')) +
@@ -189,7 +190,7 @@ class WorldsimParser(ParserElement):
         self.parser = OneOrMore(
             Group(
                 portal_id ^
-                field_ref ^
+                field_request ^
                 link_request ^
                 destroy_link_request ^
                 locate_command ^
@@ -203,38 +204,37 @@ class WorldsimParser(ParserElement):
 
     # command hooks - subclass and override
     def id_command_action(self, toks):
-        print "worldsim_parser: {}".format(toks)
         pass
 
-    def guid_command_action(self):
+    def guid_command_action(self, toks):
         pass
 
-    def link_request_action(self):
+    def link_request_action(self, toks):
         pass
 
-    def field_request_action(self):
+    def field_request_action(self, toks):
         pass
 
-    def capture_request_action(self):
+    def capture_request_action(self, toks):
         pass
 
-    def destroy_link_request_action(self):
+    def destroy_link_request_action(self, toks):
         pass
 
-    def deploy_request_action(self):
+    def deploy_request_action(self, toks):
         pass
 
-    def link_sequence_action(self):
+    def link_sequence_action(self, toks):
         pass
 
-    def command_entry_action(self):
+    def command_entry_action(self, toks):
         pass
 
-    def command_sequence_action(self):
+    def command_sequence_action(self, toks):
         pass
 
-    def locate_command_action(self):
+    def locate_command_action(self, toks):
         pass
 
-    def move_command_action(self):
+    def move_command_action(self, toks):
         pass

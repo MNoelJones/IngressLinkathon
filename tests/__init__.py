@@ -1,4 +1,5 @@
-import tests.test_linkathon
-import tests.test_mufg_gsheet
-import tests.test_worldsim
-import tests.test_worldsim_parser
+import test_mufg_gsheet
+import test_inventory
+import test_linkathon
+import test_worldsim
+import test_worldsim_parser

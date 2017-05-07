@@ -94,9 +94,11 @@ class TestLinkathon(TestCase):
             loc = locations["node_{}".format(ix)]
             p.location = loc
         l.fields.update({
-            y: linkathon.Field(*[p for x in fields[y]
-                                 for p in l.portals.values()
-                                 if p.id == x])
+            y: linkathon.Field(portals=[
+                p for x in fields[y]
+                for p in l.portals.values()
+                if p.id == x
+            ])
             for y in fields
         })
 
