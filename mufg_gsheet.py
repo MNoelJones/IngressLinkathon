@@ -20,26 +20,28 @@ class MUFG_Gsheet(object):
         self.sht = None
         self.mufg = None
         self.keys = None
+        self.min_row_loc = (1, 9)
+        self.max_row_loc = (2, 9)
         self.keycap_cols_start_end = ("G", "K")
         self.mufg_cols_start_end = ("L", "X")
-        self.cap_cols_start_end = ("Z", "AV")
+        self.cap_cols_start_end = ("Z", "AT")
         self.data_rows_start_end = (5, 56)
-        self.extra_keys_row = 61
+        self.extra_keys_row = 60
         self.key_rows_start_end = [None, None]
         self._portal_list = None
         self.init()
 
     def init(self):
         self.gc = gspread.authorize(self.creds)
-        self.sht = self.gc.open("MUFG Contents")
-        self.mufg = self.sht.worksheet('Sheet1')
-        self.keys = self.sht.worksheet('Sheet7')
+        self.sht = self.gc.open("MUFG2")
+        self.mufg = self.sht.worksheet('Inventory')
+        self.keys = self.sht.worksheet('Keys')
         MUFG_Gsheet.MufgTuple = namedtuple(
             "MufgTuple",
             self._data_values(1)
         )
-        self.key_rows_start_end[0] = int(self.keys.cell(1, 10).value)
-        self.key_rows_start_end[1] = int(self.keys.cell(2, 10).value)
+        self.key_rows_start_end[0] = int(self.keys.cell(*self.min_row_loc).value)
+        self.key_rows_start_end[1] = int(self.keys.cell(*self.max_row_loc).value)
 
     @property
     def portal_list(self):
@@ -150,11 +152,11 @@ class MUFG_Gsheet(object):
             )
         return tx
 
-    @cache
+    #@cache
     def get_col_for_target(self, sheet="mufg", target="INV"):
         sheet_target_locations = {
-            "mufg": "F2:AW2",
-            "keys": "K4:BB4"
+            "mufg": "F2:AT2",
+            "keys": "J4:AZ4"
         }
         targets = getattr(self, sheet).range(sheet_target_locations[sheet])
         c = re.compile(target, re.IGNORECASE)

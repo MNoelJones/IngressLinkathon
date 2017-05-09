@@ -8,12 +8,13 @@ class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
         self.mufg_sht = MUFG_Gsheet(
-            creds_file='IngressLinkathon-5dbf4501bc77.json'
-            # creds_file='../IngressLinkathon-a66875a48d53.json'
+            # creds_file='IngressLinkathon-5dbf4501bc77.json'
+            creds_file='/home/mnj/Downloads/IngressLinkathon-0bfda0130198.json'
         )
 
     def test_populate_inventory(self):
         tx = self.mufg_sht.get_init_transaction_from_column("INV")
+        print tx
         self.inv.apply_transaction(tx)
         self.assertEqual(
             self.inv.itemcount(),

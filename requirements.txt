@@ -1,7 +1,5 @@
-accept field definitions
-accept link definitions
-construct link definitions from field definitions
-define actions for creating links
-	define actions for collecting keys
-	define actions for making links
-define ordering of actions
+nose2
+gspread
+oauth2client
+kids.cache
+pyparsing
