@@ -25,7 +25,7 @@ class MUFG_Gsheet(object):
         self.keycap_cols_start_end = ("G", "K")
         self.mufg_cols_start_end = ("L", "X")
         self.cap_cols_start_end = ("Z", "AT")
-        self.data_rows_start_end = (5, 56)
+        self.data_rows_start_end = (4, 56)
         self.extra_keys_row = 60
         self.key_rows_start_end = [None, None]
         self._portal_list = None
@@ -132,6 +132,7 @@ class MUFG_Gsheet(object):
     def get_init_transaction_from_column(self, target="INV"):
         col_number = self.get_col_for_target("mufg", target)
         col_vals = self.get_colnum_data(col_number)
+        print(col_vals)
         tx = (
             "CR {} ".format(target) +
             " ".join(
