@@ -132,7 +132,7 @@ class MUFG_Gsheet(object):
     def get_init_transaction_from_column(self, target="INV"):
         col_number = self.get_col_for_target("mufg", target)
         col_vals = self.get_colnum_data(col_number)
-        print(col_vals)
+        extra_key_tx = self.get_extra_key_transaction(target)
         tx = (
             "CR {} ".format(target) +
             " ".join(
@@ -142,14 +142,14 @@ class MUFG_Gsheet(object):
                     if count not in ('', '0', None) and name not in "Keys"
                 ] +
                 self.get_key_transaction(target) +
-                self.get_extra_key_transaction(target)["CR"]
+                extra_key_tx["CR"]
             )
         )
-        if "DR" in self.get_extra_key_transaction(target):
+        if "DR" in extra_key_tx:
             tx += (
                 " " +
                 "DR {}".format(target) +
-                " ".join(self.get_extra_key_transaction(target)["DR"])
+                " ".join(extra_key_tx["DR"])
             )
         return tx
 

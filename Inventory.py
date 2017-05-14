@@ -230,7 +230,7 @@ class Key(Item):
         out = "KEY{}"
         additional = []
         if self.title is not None:
-            additional.append("{}".format(self.title))
+            additional.append("{}".format(repr(self.title)))
         if self.guid is not None:
             additional.append("<{}>".format(self.guid))
         return out.format("[" + " ".join(additional) + "]" if additional else "")
@@ -385,7 +385,7 @@ class Container(Item):
         self._contents = val
 
     def itemcount(self):
-        return len(self.contents)
+        return sum([x.itemcount() for x in self.contents])
 
     def invcount(self):
         return self.itemcount() + 1
@@ -423,6 +423,7 @@ class Container(Item):
             pass
 
 
+@setshortcode("MUFG")
 class MUFG(Container):
     """ """
     def __init__(self, guid=None):
@@ -437,6 +438,7 @@ class MUFG(Container):
         ]
 
 
+@setshortcode("CAP")
 class Capsule(Container):
     """ """
     def __init__(self, guid=None):
@@ -451,6 +453,7 @@ class Capsule(Container):
         ]
 
 
+@setshortcode("KCAP")
 class KeyCapsule(Container):
     def __init__(self, guid=None):
         super(KeyCapsule, self).__init__(guid=guid)
