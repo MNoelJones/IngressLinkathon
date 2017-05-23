@@ -95,7 +95,7 @@ def rarityproperty(cls):
             state = old_eq(self, other)
             try:
                 state = state and (self.rarity == other.rarity)
-            except:
+            except AttributeError:
                 pass
             return state
 
@@ -118,7 +118,7 @@ def levelproperty(cls):
             state = old_eq(self, other)
             try:
                 state = state and (self.level == other.level)
-            except:
+            except AttributeError:
                 pass
             return state
 
@@ -778,7 +778,6 @@ class Inventory(object):
                     getattr(target, operation)(item)
             else:
                 getattr(target, operation)(item)
-
 
     def _get_transaction_item(self, match):
         if match.group("key"):

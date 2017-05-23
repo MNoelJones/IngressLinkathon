@@ -53,8 +53,10 @@ class MUFG_Gsheet(object):
         self._portal_list = None
         return self.portal_list
 
-    def _data_values(self, col_num):
-        return self.mufg.col_values(col_num)[
+    @cache
+    def _data_values(self, col_num, from_sheet="mufg"):
+        sheet = getattr(self, from_sheet)
+        return sheet.col_values(col_num)[
             self.data_rows_start_end[0]:
             self.data_rows_start_end[1]
         ]
@@ -153,7 +155,7 @@ class MUFG_Gsheet(object):
             )
         return tx
 
-    #@cache
+    @cache
     def get_col_for_target(self, sheet="mufg", target="INV"):
         sheet_target_locations = {
             "mufg": "F2:AT2",

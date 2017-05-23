@@ -2,16 +2,13 @@
 from unittest import TestCase
 from mufg_gsheet import MUFG_Gsheet
 from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
+from creds_file import CREDSFILE
 
 
 class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
-        self.mufg_sht = MUFG_Gsheet(
-            # creds_file='IngressLinkathon-5dbf4501bc77.json'
-            # creds_file='/home/mnj/Downloads/IngressLinkathon-0bfda0130198.json'
-            creds_file='/home/mnj/Downloads/IngressLinkathon-a66875a48d53.json'
-        )
+        self.mufg_sht = MUFG_Gsheet(creds_file=CREDSFILE)
 
     def test_populate_inventory(self):
         """ Populate mufg instance from INV column """
@@ -93,3 +90,39 @@ class TestMUFGGsheet(TestCase):
 
     def test_find_capsules_with_key_changes(self):
         pass
+
+    def temp():
+        import mufg_gsheet
+        import Inventory
+        KeyCapsule = Inventory.KeyCapsule
+        Capsule = Inventory.Capsule
+        MUFG_Gsheet = mufg_gsheet.MUFG_Gsheet
+        creds_file = CREDSFILE
+        mufg_sht = MUFG_Gsheet(creds_file)
+        tx = mufg_sht.get_init_transaction_from_column("INV")
+        inv = Inventory.Inventory()
+        inv.apply_transaction(tx)
+        tx = mufg_sht.get_init_transaction_from_column("GREEN")
+        inv.add(KeyCapsule("GREEN"))
+        inv.apply_transaction(tx)
+        tx = mufg_sht.get_init_transaction_from_column("C6A8C75A")
+        inv.add(Capsule("C6A8C75A"))
+        desired = zip(
+            mufg_sht._data_values(1, from_sheet='keys'),
+            mufg_sht._data_values(8, from_sheet='keys')
+        )
+        return desired
+
+    def temp2():
+        import mufg_gsheet
+        import Inventory
+        KeyCapsule = Inventory.KeyCapsule
+        MUFG_Gsheet = mufg_gsheet.MUFG_Gsheet
+        creds_file = CREDSFILE
+        mufg_sht = MUFG_Gsheet(creds_file)
+        inv = Inventory.Inventory()
+        inv.add(KeyCapsule("GREEN"))
+        tx = mufg_sht.get_init_transaction_from_column("GREEN")
+        inv.apply_transaction(tx)
+        kc = inv.keycaps["GREEN"]
+        [k.name for k in kc.keys]
