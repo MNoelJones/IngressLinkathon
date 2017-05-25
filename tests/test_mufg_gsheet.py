@@ -4,11 +4,13 @@ from mufg_gsheet import MUFG_Gsheet
 from Inventory import Inventory, MUFG, Capsule, Key, KeyCapsule
 from creds_file import CREDSFILE
 
+MUFG_SHT = MUFG_Gsheet(creds_file=CREDSFILE)
+
 
 class TestMUFGGsheet(TestCase):
     def setUp(self):
         self.inv = Inventory()
-        self.mufg_sht = MUFG_Gsheet(creds_file=CREDSFILE)
+        self.mufg_sht = MUFG_SHT
 
     def test_populate_inventory(self):
         """ Populate mufg instance from INV column """
