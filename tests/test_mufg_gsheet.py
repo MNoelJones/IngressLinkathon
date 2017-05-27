@@ -32,7 +32,6 @@ class TestMUFGGsheet(TestCase):
             tx = mufg_sht.get_init_transaction_from_column(target=guid)
             inv.add(MUFG(guid))
             inv.apply_transaction(tx)
-        for colnum, guid in mufgs:
             self.assertEqual(
                 inv.mufgs[guid].itemcount(),
                 int(mufg_sht.mufg.cell(4, colnum).value)
