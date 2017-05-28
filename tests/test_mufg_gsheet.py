@@ -32,6 +32,7 @@ class TestMUFGGsheet(TestCase):
             tx = mufg_sht.get_init_transaction_from_column(target=guid)
             inv.add(MUFG(guid))
             inv.apply_transaction(tx)
+            print guid,
             self.assertEqual(
                 inv.mufgs[guid].itemcount(),
                 int(mufg_sht.mufg.cell(4, colnum).value)
@@ -45,8 +46,7 @@ class TestMUFGGsheet(TestCase):
             )
             self.inv.add(Capsule(guid))
             self.inv.apply_transaction(tx)
-        for colnum, guid in caps:
-            print guid,
+            print colnum, '"' + guid + '"'
             self.assertEqual(
                 self.inv.capsules[guid].itemcount(),
                 int(self.mufg_sht.mufg.cell(4, colnum).value)

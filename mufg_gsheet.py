@@ -24,9 +24,9 @@ class MUFG_Gsheet(object):
         self.max_row_loc = (2, 9)
         self.keycap_cols_start_end = ("G", "K")
         self.mufg_cols_start_end = ("L", "X")
-        self.cap_cols_start_end = ("Z", "AT")
+        self.cap_cols_start_end = ("AA", "AU")
         self.data_rows_start_end = (4, 56)
-        self.extra_keys_row = 60
+        self.extra_keys_row = 61
         self.key_rows_start_end = [None, None]
         self._portal_list = None
         self.init()
@@ -148,9 +148,8 @@ class MUFG_Gsheet(object):
             )
         )
         if "DR" in extra_key_tx:
-            tx += (
-                " " +
-                "DR {}".format(target) +
+            tx += " DR {} {}".format(
+                target,
                 " ".join(extra_key_tx["DR"])
             )
         return tx
