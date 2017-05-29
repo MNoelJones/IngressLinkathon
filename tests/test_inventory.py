@@ -85,28 +85,31 @@ class TestProcessTransaction(TestCase):
     def setUp(self):
         self.inventory = Inventory.Inventory()
 
+    from collections import namedtuple
+    ItemLevelCount = namedtuple("ItemLevelCount", ["count", "level"])
+
     @params(
         (
             "individual item",
             "CR INV 5 X8",
             {
-                "bursters": (8, 5)
+                "bursters": ItemLevelCount(level=8, count=5)
             }
         ),
         (
             "multiple items",
             "CR INV 5 X8 3 R6",
             {
-                "bursters": (8, 5),
-                "resonators": (6, 3)
+                "bursters": ItemLevelCount(level=8, count=5),
+                "resonators": ItemLevelCount(level=6, count=3)
             }
         )
     )
     def test_credit_transaction(self, name, transaction, conditions):
         self.inventory.apply_transaction(transaction)
         for prop, condition in conditions.iteritems():
-            self.assertEqual(len(getattr(self.inventory, prop)), condition[1])
-            self.assertTrue(all(x.level == condition[0] for x in getattr(self.inventory, prop)))
+            self.assertEqual(len(getattr(self.inventory, prop)), condition.count)
+            self.assertTrue(all(x.level == condition.level for x in getattr(self.inventory, prop)))
 
     def test_debit_transation(self):
         self.inventory.apply_transaction("CR INV 5 X8")
@@ -133,6 +136,26 @@ class TestProcessTransaction(TestCase):
         self.assertTrue(all(x.level == 8 for x in self.inventory.capsules["9FD860A1"]))
         self.assertEqual(len(self.inventory.capsules["9FD860A1"].bursters), 2)
         self.assertEqual(len(self.inventory.capsules["AABBAABB"].bursters), 0)
+
+    def test_debit_key_transaction(self):
+        guid = "9FD860A1"
+        # Add a Capsule with a GUID
+        capsule = Inventory.Capsule(guid)
+        self.inventory.add(capsule)
+        transaction = (
+            "CR 9FD860A1 "
+            "KEY[\'Tri Bench Sculpture\' <069ea474db4947f8bed7457040b850fb.16>] "
+            "KEY[\'Whiteley Walks\' <563a7d51be134cb4b5f0c3ae65912a9e.16>] "
+            "KEY[\'Whiteley Walks\' <9949b5e0dc08434c9cc24fe9e499e910.16>] "
+            "KEY[\'Whiteley Walks Round Coppice\' <cfce7949be3f41b9adffd383b6673752.16>]"
+            "KEY[\'Winchester Miz Maze\' <>]"
+        )
+        self.inventory.apply_transaction(transaction)
+        self.assertEqual(len(self.inventory.capsules["9FD860A1"].keys), 5)
+
+        transaction = "DR 9FD860A1 3 KEY"
+        self.inventory.apply_transaction(transaction)
+        self.assertEqual(len(self.inventory.capsules["9FD860A1"].keys), 2)
 
     def test_stored_transaction(self):
         inventory = self.inventory

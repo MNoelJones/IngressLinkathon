@@ -337,6 +337,8 @@ class Container(Item):
         self._contents = []
         # Array of valid items for this container
         self._restricted_items = []
+        # Modifier for key count, when actual keys added or deleted are not known. -ve = deleted
+        self._key_modifier = 0
 
     def __iter__(self):
         return _Pointer(self._contents)
@@ -385,7 +387,7 @@ class Container(Item):
         self._contents = val
 
     def itemcount(self):
-        return sum([x.itemcount() for x in self.contents])
+        return sum([x.itemcount() for x in self.contents]) + self._key_modifier
 
     def invcount(self):
         return self.itemcount() + 1
@@ -696,6 +698,7 @@ class Inventory(object):
         self.inventory.append(item)
 
     def delete(self, item):
+        print "DELETE {}".format(item)
         try:
             for elem in self.inventory:
                 if item == elem:
@@ -736,11 +739,15 @@ class Inventory(object):
         for transaction in self.staged_transactions:
             self.apply_transaction(transaction)
 
-    def apply_transaction(self, transaction):
-        tx_re = re.compile(
+    @property
+    def apply_re(self):
+        return re.compile(
             r'(?P<crdr>CR|DR)\s+(?P<target>\w+)\s+'
             r'(?P<transaction>(?:(\d+\s+\w+\d?|KEY\s*\[.*?\])\s*)+)'
         )
+
+    def apply_transaction(self, transaction):
+        tx_re = self.apply_re
         operations = {
             "CR": "add",
             "DR": "delete"
@@ -755,8 +762,9 @@ class Inventory(object):
                 match.group("transaction")
             )
 
-    def _apply_individual_transaction(self, operation, target, transaction):
-        tx_re = re.compile(
+    @property
+    def apply_individual_re(self):
+        return re.compile(
             (
                 r'(?:(?P<amount>\d+)\s+)?'
                 r'(?:'
@@ -771,10 +779,12 @@ class Inventory(object):
             )
         )
 
+    def _apply_individual_transaction(self, operation, target, transaction):
+        tx_re = self.apply_individual_re
         for match in tx_re.finditer(transaction):
             item = self._get_transaction_item(match)
             if "amount" in match.groupdict() and match.group("amount"):
-                for _ in range(0, int(match.group("amount"))):
+                for _ in xrange(0, int(match.group("amount"))):
                     getattr(target, operation)(item)
             else:
                 getattr(target, operation)(item)
