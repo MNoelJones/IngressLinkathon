@@ -23,8 +23,14 @@ class MUFG_Gsheet(object):
         self.min_row_loc = (1, 9)
         self.max_row_loc = (2, 9)
         self.keycap_cols_start_end = ("G", "K")
-        self.mufg_cols_start_end = ("L", "X")
+        self.mufg_cols_start_end = ("L", "Y")
         self.cap_cols_start_end = ("AA", "AU")
+        self.guid_locations = {
+            "mufg": "F4:{}4".format(
+                self.cap_cols_start_end[1]
+            ),
+            "keys": "J2:BA2",
+        }
         self.data_rows_start_end = (4, 56)
         self.extra_keys_row = 61
         self.key_rows_start_end = [None, None]
@@ -156,10 +162,7 @@ class MUFG_Gsheet(object):
 
     @cache
     def get_col_for_target(self, sheet="mufg", target="INV"):
-        sheet_target_locations = {
-            "mufg": "F2:AT2",
-            "keys": "J4:AZ4"
-        }
+        sheet_target_locations = self.guid_locations
         targets = getattr(self, sheet).range(sheet_target_locations[sheet])
         c = re.compile(target, re.IGNORECASE)
         try:
