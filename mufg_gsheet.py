@@ -26,10 +26,10 @@ class MUFG_Gsheet(object):
         self.mufg_cols_start_end = ("L", "Y")
         self.cap_cols_start_end = ("AA", "AU")
         self.guid_locations = {
-            "mufg": "F4:{}4".format(
+            "mufg": "F2:{}2".format(
                 self.cap_cols_start_end[1]
             ),
-            "keys": "J2:BA2",
+            "keys": "J4:BA4",
         }
         self.data_rows_start_end = (4, 56)
         self.extra_keys_row = 61
